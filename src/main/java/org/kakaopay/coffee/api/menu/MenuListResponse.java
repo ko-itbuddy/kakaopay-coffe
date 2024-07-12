@@ -2,11 +2,9 @@ package org.kakaopay.coffee.api.menu;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.kakaopay.coffee.api.common.ApiResponse;
-import org.springframework.http.HttpStatus;
 
 @Getter
-public class MenuResponse {
+public class MenuListResponse {
 
     private Long id;
     private String name;
@@ -14,7 +12,7 @@ public class MenuResponse {
     private int inventory;
 
     @Builder
-    private MenuResponse(Long id, String name, int price, int inventory) {
+    private MenuListResponse(Long id, String name, int price, int inventory) {
         this.id = id;
         this.name = name;
         this.price = price;

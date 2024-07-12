@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum MenuGetSort {
+public enum MenuListSort {
     NAME_ASC,
     NAME_DESC;
 }
