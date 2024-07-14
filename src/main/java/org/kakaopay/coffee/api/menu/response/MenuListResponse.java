@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.api.menu;
+package org.kakaopay.coffee.api.menu.response;
 
 import lombok.Builder;
 import lombok.Getter;

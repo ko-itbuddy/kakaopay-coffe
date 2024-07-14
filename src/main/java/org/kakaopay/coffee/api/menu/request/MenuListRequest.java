@@ -1,9 +1,10 @@
-package org.kakaopay.coffee.api.menu;
+package org.kakaopay.coffee.api.menu.request;
 
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.kakaopay.coffee.api.menu.MenuListSort;
 
 @Getter
 @NoArgsConstructor
