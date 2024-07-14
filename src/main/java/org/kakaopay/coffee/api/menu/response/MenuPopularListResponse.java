@@ -8,14 +8,14 @@ import org.kakaopay.coffee.api.menu.Menu;
 
 @Getter
 @NoArgsConstructor
-public class MenuListResponse {
+public class MenuPopularListResponse {
 
     private Long totalCount;
     private Long currentPage;
     private List<Menu> menus;
 
     @Builder
-    private MenuListResponse(Long totalCount, Long currentPage, List<Menu> menus) {
+    private MenuPopularListResponse(Long totalCount, Long currentPage, List<Menu> menus) {
         this.totalCount = totalCount;
         this.currentPage = currentPage;
         this.menus = menus;

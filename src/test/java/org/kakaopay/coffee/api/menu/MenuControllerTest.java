@@ -1,6 +1,5 @@
 package org.kakaopay.coffee.api.menu;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -107,6 +106,96 @@ class MenuControllerTest {
             // when // then
             mockMvc.perform(
                        get("/api/menus")
+                           .content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   )
+                   .andDo(print())
+                   .andExpect(status().isBadRequest());
+
+
+        }
+    }
+
+    @Nested
+    @DisplayName("4. 인기메뉴 목록 조회 API")
+    class MenuPopularList {
+
+        @Test
+        @DisplayName("정상 요청")
+        void withSuccessCase() throws Exception {
+            // given
+            MenuListRequest request = MenuListRequest.builder()
+                                                     .page(1)
+                                                     .count(10)
+                                                     .sort(MenuListSort.NAME_ASC)
+                                                     .build();
+
+            // when // then
+            mockMvc.perform(
+                       get("/api/menus/popular")
+                           .content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   )
+                   .andDo(print())
+                   .andExpect(status().isOk());
+
+
+        }
+
+        @Test
+        @DisplayName("메뉴 조회시 틀린 정렬과 함께 조회")
+        void withIncorrectSort() throws Exception {
+            // given
+            Map<String, String> request = new HashMap<>();
+            request.put("page", "1");
+            request.put("count", "10");
+            request.put("sort", "INCORRECT_SORT");
+
+            // when // then
+            mockMvc.perform(
+                       get("/api/menus/popular")
+                           .content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   )
+                   .andDo(print())
+                   .andExpect(status().isBadRequest());
+
+
+        }
+
+        @Test
+        @DisplayName("메뉴 조회시 page 음수")
+        void withMinusPage() throws Exception {
+            // given
+            MenuListRequest request = MenuListRequest.builder()
+                                                     .page(-1)
+                                                     .count(10)
+                                                     .build();
+
+            // when // then
+            mockMvc.perform(
+                       get("/api/menus/popular")
+                           .content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   )
+                   .andDo(print())
+                   .andExpect(status().isBadRequest());
+
+
+        }
+
+        @Test
+        @DisplayName("메뉴 조회시 count 음수")
+        void withMinusCount() throws Exception {
+            // given
+            MenuListRequest request = MenuListRequest.builder()
+                                                     .page(1)
+                                                     .count(-10)
+                                                     .build();
+
+            // when // then
+            mockMvc.perform(
+                       get("/api/menus/popular")
                            .content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    )

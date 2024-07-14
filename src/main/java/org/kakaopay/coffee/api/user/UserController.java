@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.kakaopay.coffee.api.common.ApiResponse;
-import org.kakaopay.coffee.api.user.request.UserSignUpRequest;
 import org.kakaopay.coffee.api.user.request.UserLoginRequest;
 import org.kakaopay.coffee.api.user.request.UserRechargePointRequest;
+import org.kakaopay.coffee.api.user.request.UserSignUpRequest;
 import org.kakaopay.coffee.api.user.response.UserLoginResponse;
 import org.kakaopay.coffee.api.user.response.UserRechargePointResponse;
 import org.springframework.http.HttpStatus;
@@ -55,7 +55,7 @@ public class UserController {
         UserLoginResponse result = UserLoginResponse.builder()
                                                     .phone("010-1234-1234")
                                                     .name("데드풀")
-                                                    .userKey(1L)
+                                                    .id(1L)
                                                     .build();
 
         return ApiResponse.of(HttpStatus.OK, result);
