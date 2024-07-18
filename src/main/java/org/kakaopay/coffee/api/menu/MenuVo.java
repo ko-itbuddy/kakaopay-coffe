@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class Menu {
+public class MenuVo {
 
     private Long id;
     private String name;
@@ -14,7 +14,7 @@ public class Menu {
     private int inventory;
 
     @Builder
-    private Menu(Long id, String name, int price, int inventory) {
+    private MenuVo(Long id, String name, int price, int inventory) {
         this.id = id;
         this.name = name;
         this.price = price;

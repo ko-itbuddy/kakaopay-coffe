@@ -24,4 +24,11 @@ public class UserLoginRequest {
         this.phone = phone;
         this.password = password;
     }
+
+    public UserLoginServiceRequest toServiceRequest() {
+        return UserLoginServiceRequest.builder()
+                                      .phone(this.phone)
+                                      .password(this.password)
+                                      .build();
+    }
 }

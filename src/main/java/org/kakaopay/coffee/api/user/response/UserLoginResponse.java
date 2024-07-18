@@ -3,6 +3,7 @@ package org.kakaopay.coffee.api.user.response;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.kakaopay.coffee.api.user.UserEntity;
 
 @Getter
 @NoArgsConstructor
@@ -19,6 +20,15 @@ public class UserLoginResponse {
         this.phone = phone;
         this.name = name;
         this.point = point;
+    }
+
+    public static UserLoginResponse of(UserEntity userEntity) {
+        return UserLoginResponse.builder()
+                                .id(userEntity.getId())
+                                .phone(userEntity.getPhone())
+                                .name(userEntity.getName())
+                                .point(userEntity.getPointSum())
+                                .build();
     }
 
 }

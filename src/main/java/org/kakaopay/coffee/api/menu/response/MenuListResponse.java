@@ -1,10 +1,11 @@
 package org.kakaopay.coffee.api.menu.response;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kakaopay.coffee.api.menu.Menu;
+import org.kakaopay.coffee.api.menu.MenuVo;
 
 @Getter
 @NoArgsConstructor
@@ -12,10 +13,10 @@ public class MenuListResponse {
 
     private Long totalCount;
     private Long currentPage;
-    private List<Menu> menus;
+    private List<MenuVo> menus = new ArrayList<>();
 
     @Builder
-    private MenuListResponse(Long totalCount, Long currentPage, List<Menu> menus) {
+    private MenuListResponse(Long totalCount, Long currentPage, List<MenuVo> menus) {
         this.totalCount = totalCount;
         this.currentPage = currentPage;
         this.menus = menus;

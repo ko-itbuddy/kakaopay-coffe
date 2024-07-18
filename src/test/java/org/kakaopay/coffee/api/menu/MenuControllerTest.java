@@ -27,9 +27,11 @@ class MenuControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+
+
     @Nested
     @DisplayName("1. 커피메뉴목록조회API")
-    class MenuList{
+    class MenuVoList {
         @Test
         @DisplayName("정상 요청")
         void withSuccessCase() throws Exception {
@@ -118,7 +120,7 @@ class MenuControllerTest {
 
     @Nested
     @DisplayName("4. 인기메뉴 목록 조회 API")
-    class MenuPopularList {
+    class MenuVoPopularList {
 
         @Test
         @DisplayName("정상 요청")

@@ -18,15 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
+    private final UserService userService;
+
 
     /*
      * 2. 포인트 충전하기 API
      * */
     @PostMapping("api/users/point")
     public ApiResponse<UserRechargePointResponse> rechargeUserPoint(
-        @Valid @RequestBody UserRechargePointRequest request) {
+        @Valid @RequestBody UserRechargePointRequest request) throws Exception {
 
-        UserRechargePointResponse result = UserRechargePointResponse.builder().point(5000).build();
+        UserRechargePointResponse result = userService.rechargeUserPoint(request.toServiceRequest());
 
         return ApiResponse.of(HttpStatus.OK, result);
     }
@@ -37,12 +39,9 @@ public class UserController {
      * */
     @PostMapping("api/users")
     public ApiResponse<Object> signUp(
-        @Valid @RequestBody UserSignUpRequest request) throws BadRequestException {
-
-        if(request.getPhone().equals("010-1111-1111"))
-            throw new BadRequestException("이미 가입한 전화번호 입니다");
-
-        return ApiResponse.of(HttpStatus.OK, null);
+        @Valid @RequestBody UserSignUpRequest request) throws Exception {
+        userService.signUp(request.toServiceRequest());
+        return ApiResponse.ok(null);
     }
 
     /*
@@ -50,15 +49,9 @@ public class UserController {
      * */
     @PostMapping("api/users/login")
     public ApiResponse<UserLoginResponse> login(
-        @Valid @RequestBody UserLoginRequest request) {
+        @Valid @RequestBody UserLoginRequest request) throws Exception {
 
-        UserLoginResponse result = UserLoginResponse.builder()
-                                                    .phone("010-1234-1234")
-                                                    .name("데드풀")
-                                                    .id(1L)
-                                                    .build();
-
-        return ApiResponse.of(HttpStatus.OK, result);
+        return ApiResponse.ok(userService.login(request.toServiceRequest()));
     }
 
 }

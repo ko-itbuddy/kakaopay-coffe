@@ -29,4 +29,12 @@ public class UserSignUpRequest {
         this.name = name;
         this.password = password;
     }
+
+    public UserSignUpServiceRequest toServiceRequest() {
+        return UserSignUpServiceRequest.builder()
+                                .phone(this.phone)
+                                .name(this.name)
+                                .password(this.password)
+                                .build();
+    }
 }

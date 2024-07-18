@@ -25,10 +25,10 @@ public class MenuController {
         MenuListResponse result = new MenuListResponse();
 
         for (int i = 0; i < 10; i++) {
-            result.getMenus().add(Menu.builder()
-                                       .id(Long.valueOf(i))
-                                       .name("coffee" + i).inventory(10).price(1500)
-                                       .build());
+            result.getMenus().add(MenuVo.builder()
+                                          .id(Long.valueOf(i))
+                                          .name("coffee" + i).inventory(10).price(1500)
+                                          .build());
         }
 
         return ApiResponse.of(HttpStatus.OK, result);
@@ -43,10 +43,10 @@ public class MenuController {
         MenuPopularListResponse result = new MenuPopularListResponse();
 
         for (int i = 0; i < 10; i++) {
-            result.getMenus().add(Menu.builder()
-                                      .id(Long.valueOf(i))
-                                      .name("coffee" + i).inventory(10).price(1500)
-                                      .build());
+            result.getMenus().add(MenuVo.builder()
+                                          .id(Long.valueOf(i))
+                                          .name("coffee" + i).inventory(10).price(1500)
+                                          .build());
         }
 
         return ApiResponse.of(HttpStatus.OK, result);

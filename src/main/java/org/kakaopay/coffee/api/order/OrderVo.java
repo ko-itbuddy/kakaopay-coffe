@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class Order {
+public class OrderVo {
 
     @NotNull
     private Long menuId;
@@ -18,7 +18,7 @@ public class Order {
     private int quantity;
 
     @Builder
-    private Order(Long menuId, int quantity) {
+    private OrderVo(Long menuId, int quantity) {
         this.menuId = menuId;
         this.quantity = quantity;
     }
