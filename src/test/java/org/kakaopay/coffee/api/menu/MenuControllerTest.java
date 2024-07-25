@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.kakaopay.coffee.api.menu.request.MenuListRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +29,7 @@ class MenuControllerTest {
     ObjectMapper objectMapper;
 
 
+    @MockBean MenuService menuService;
 
     @Nested
     @DisplayName("1. 커피메뉴목록조회API")
@@ -37,8 +39,8 @@ class MenuControllerTest {
         void withSuccessCase() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(1)
-                                                     .count(10)
+                                                     .page(1L)
+                                                     .count(10L)
                                                      .sort(MenuListSort.NAME_ASC)
                                                      .build();
 
@@ -80,8 +82,8 @@ class MenuControllerTest {
         void withMinusPage() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(-1)
-                                                     .count(10)
+                                                     .page(-1L)
+                                                     .count(10L)
                                                      .build();
 
             // when // then
@@ -101,8 +103,8 @@ class MenuControllerTest {
         void withMinusCount() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(1)
-                                                     .count(-10)
+                                                     .page(1L)
+                                                     .count(-10L)
                                                      .build();
 
             // when // then
@@ -127,8 +129,8 @@ class MenuControllerTest {
         void withSuccessCase() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(1)
-                                                     .count(10)
+                                                     .page(1L)
+                                                     .count(10L)
                                                      .sort(MenuListSort.NAME_ASC)
                                                      .build();
 
@@ -170,8 +172,8 @@ class MenuControllerTest {
         void withMinusPage() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(-1)
-                                                     .count(10)
+                                                     .page(-1L)
+                                                     .count(10L)
                                                      .build();
 
             // when // then
@@ -191,8 +193,8 @@ class MenuControllerTest {
         void withMinusCount() throws Exception {
             // given
             MenuListRequest request = MenuListRequest.builder()
-                                                     .page(1)
-                                                     .count(-10)
+                                                     .page(1L)
+                                                     .count(-10L)
                                                      .build();
 
             // when // then

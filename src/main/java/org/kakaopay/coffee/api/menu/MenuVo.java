@@ -20,4 +20,13 @@ public class MenuVo {
         this.price = price;
         this.inventory = inventory;
     }
+
+    public static MenuVo of(MenuEntity menuEntity) {
+        return MenuVo.builder()
+                     .id(menuEntity.getMenuId())
+                     .name(menuEntity.getName())
+                     .price(menuEntity.getPrice())
+                     .inventory(menuEntity.getInventory())
+                     .build();
+    }
 }

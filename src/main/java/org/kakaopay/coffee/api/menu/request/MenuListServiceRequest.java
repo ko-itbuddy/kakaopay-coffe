@@ -9,22 +9,20 @@ import org.kakaopay.coffee.api.menu.MenuListSort;
 
 @Getter
 @NoArgsConstructor
-public class MenuPopularListRequest {
+public class MenuListServiceRequest {
 
     @PositiveOrZero(message = "page는 0이상의 수 입니다.")
-    private int page;
+    private Long page;
 
     @Positive(message = "count는 양수입니다.")
-    private int count;
+    private Long count;
 
     private MenuListSort sort = MenuListSort.NAME_ASC;
 
     @Builder
-    private MenuPopularListRequest(int page, int count, MenuListSort sort) {
+    private MenuListServiceRequest(Long page, Long count, MenuListSort sort) {
         this.page = page;
         this.count = count;
         this.sort = sort;
     }
-
-
 }

@@ -8,10 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -29,20 +29,27 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
     private Long menuKey;
 
     @Column
-    @NotNull
     private Long menuId;
 
     @Column
-    @NotNull
     private String name;
 
     @Column
-    @NotNull
     private Integer inventory;
 
     @Column
-    @NotNull
     private Integer price;
+
+    @Builder
+    private MenuEntity(Long menuKey, Long menuId, String name, Integer inventory, Integer price,
+        SortedSet<OrderMenuEntity> orderMenus) {
+        this.menuKey = menuKey;
+        this.menuId = menuId;
+        this.name = name;
+        this.inventory = inventory;
+        this.price = price;
+        this.orderMenus = orderMenus;
+    }
 
     @ToString.Exclude
     @OneToMany
@@ -57,5 +64,9 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
     @Override
     public int compareTo(MenuEntity o) {
         return 1;
+    }
+
+    public void decrease(Integer val){
+        this.inventory = this.inventory - val;
     }
 }

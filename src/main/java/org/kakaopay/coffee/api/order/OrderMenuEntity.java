@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.kakaopay.coffee.api.common.BaseEntity;
@@ -23,19 +24,36 @@ public class OrderMenuEntity extends BaseEntity {
     private Long id;
 
     @Column
-    @NotNull
+    private Long orderId;
+
+    @Column
     private Long userId;
 
     @Column
-    @NotNull
     private Long menuKey;
 
     @Column
-    @NotNull
     private int orderSequence;
 
     @Column
-    @NotNull
     private int quantity;
 
+
+    @Builder
+    private OrderMenuEntity(Long userId, Long menuKey, int orderSequence, int quantity) {
+        this.userId = userId;
+        this.menuKey = menuKey;
+        this.orderSequence = orderSequence;
+        this.quantity = quantity;
+    }
+
+
+    public static OrderMenuEntity of(OrderVo orderVo, Long userId, int orderSequence) {
+        return OrderMenuEntity.builder()
+                              .userId(userId)
+                              .menuKey(orderVo.getMenuId())
+                              .orderSequence(orderSequence)
+                              .quantity(orderVo.getQuantity())
+                              .build();
+    }
 }

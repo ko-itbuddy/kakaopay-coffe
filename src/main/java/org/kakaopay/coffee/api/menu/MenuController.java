@@ -16,20 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MenuController {
 
+    private final MenuService menuService;
+
     /*
      * 1. 커피메뉴목록조회API
      * */
     @GetMapping("api/menus")
     public ApiResponse<MenuListResponse> getMenuList(@Valid @RequestBody MenuListRequest request) {
 
-        MenuListResponse result = new MenuListResponse();
-
-        for (int i = 0; i < 10; i++) {
-            result.getMenus().add(MenuVo.builder()
-                                          .id(Long.valueOf(i))
-                                          .name("coffee" + i).inventory(10).price(1500)
-                                          .build());
-        }
+        MenuListResponse result = menuService.getMenuList(request.toMenuListServiceRequest());
 
         return ApiResponse.of(HttpStatus.OK, result);
     }

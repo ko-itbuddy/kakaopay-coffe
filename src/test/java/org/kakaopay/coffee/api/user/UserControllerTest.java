@@ -2,17 +2,19 @@ package org.kakaopay.coffee.api.user;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.kakaopay.coffee.api.user.request.UserLoginRequest;
 import org.kakaopay.coffee.api.user.request.UserRechargePointRequest;
-import org.kakaopay.coffee.api.user.request.UserRechargePointServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserSignUpRequest;
+import org.kakaopay.coffee.api.user.response.UserLoginResponse;
+import org.kakaopay.coffee.api.user.response.UserRechargePointResponse;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -53,7 +55,13 @@ class UserControllerTest {
                            content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    ).andDo(print())
-                   .andExpect(status().isOk());
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.code").value("200"))
+                   .andExpect(jsonPath("$.status").value("OK"))
+                   .andExpect(jsonPath("$.msg").value("OK"))
+                   .andExpect(jsonPath("$.result").isEmpty())
+
+            ;
 
             // then
         }
@@ -72,7 +80,12 @@ class UserControllerTest {
                            content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    ).andDo(print())
-                   .andExpect(status().isBadRequest());
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("포인트 충전은 양수만 가능합니다."))
+                   .andExpect(jsonPath("$.result").isEmpty())
+            ;
 
             // then
         }
@@ -99,7 +112,12 @@ class UserControllerTest {
                            content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    ).andDo(print())
-                   .andExpect(status().isOk());
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.code").value("200"))
+                   .andExpect(jsonPath("$.status").value("OK"))
+                   .andExpect(jsonPath("$.msg").value("OK"))
+                   .andExpect(jsonPath("$.result").isEmpty())
+            ;
 
 
         }
@@ -121,7 +139,11 @@ class UserControllerTest {
                            content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    ).andDo(print())
-                   .andExpect(status().isBadRequest());
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("전화번호 양식에 맞지 않습니다."))
+                   .andExpect(jsonPath("$.result").isEmpty());
 
         }
 
@@ -165,6 +187,50 @@ class UserControllerTest {
 
         }
 
+
+        @Test
+        @DisplayName("비밀번호 8자리 입력")
+        void withOverDigitPassword() throws Exception {
+            // given
+            UserSignUpRequest request = UserSignUpRequest.builder()
+                                                         .phone("010-1234-1234")
+                                                         .name("데드풀")
+                                                         .password("12345678")
+                                                         .build();
+
+            // when // then
+            mockMvc.perform(
+                       post("/api/users").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("비밀번호는 숫자 6자리 입니다."));
+        }
+
+        @Test
+        @DisplayName("비밀번호 4자리 입력")
+        void withUnderDigitPassword() throws Exception {
+            // given
+            UserSignUpRequest request = UserSignUpRequest.builder()
+                                                         .phone("010-1234-1234")
+                                                         .name("데드풀")
+                                                         .password("1234")
+                                                         .build();
+
+            // when // then
+            mockMvc.perform(
+                       post("/api/users").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("비밀번호는 숫자 6자리 입니다."));
+        }
     }
 
     @Nested
@@ -186,9 +252,94 @@ class UserControllerTest {
                            content(objectMapper.writeValueAsString(request))
                            .contentType(MediaType.APPLICATION_JSON)
                    ).andDo(print())
-                   .andExpect(status().isOk());
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.code").value("200"))
+                   .andExpect(jsonPath("$.status").value("OK"))
+                   .andExpect(jsonPath("$.msg").value("OK"));
+        }
 
+        @Test
+        @DisplayName("비밀번호 8자리 입력")
+        void withOverDigitPassword() throws Exception {
+            // given
+            UserLoginRequest request = UserLoginRequest.builder()
+                                                       .phone("010-1234-1234")
+                                                       .password("12345678")
+                                                       .build();
 
+            // when // then
+            mockMvc.perform(
+                       post("/api/users/login").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("비밀번호는 숫자 6자리 입니다."));
+        }
+
+        @Test
+        @DisplayName("비밀번호 4자리 입력")
+        void withUnderDigitPassword() throws Exception {
+            // given
+            UserLoginRequest request = UserLoginRequest.builder()
+                                                       .phone("010-1234-1234")
+                                                       .password("1234")
+                                                       .build();
+
+            // when // then
+            mockMvc.perform(
+                       post("/api/users/login").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("비밀번호는 숫자 6자리 입니다."));
+        }
+
+        @Test
+        @DisplayName("전화번호 양식 틀림 1")
+        void withWrongPhone1() throws Exception {
+            // given
+            UserLoginRequest request = UserLoginRequest.builder()
+                                                       .phone("010-1234444-1234")
+                                                       .password("123456")
+                                                       .build();
+
+            // when // then
+            mockMvc.perform(
+                       post("/api/users/login").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("전화번호 양식에 맞지 않습니다."));
+        }
+
+        @Test
+        @DisplayName("전화번호 양식 틀림 2")
+        void withWrongPhone2() throws Exception {
+            // given
+            UserLoginRequest request = UserLoginRequest.builder()
+                                                       .phone("01000-123-1234")
+                                                       .password("123456")
+                                                       .build();
+
+            // when // then
+            mockMvc.perform(
+                       post("/api/users/login").
+                           content(objectMapper.writeValueAsString(request))
+                           .contentType(MediaType.APPLICATION_JSON)
+                   ).andDo(print())
+                   .andExpect(status().isBadRequest())
+                   .andExpect(jsonPath("$.code").value("400"))
+                   .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                   .andExpect(jsonPath("$.msg").value("전화번호 양식에 맞지 않습니다."));
         }
 
     }

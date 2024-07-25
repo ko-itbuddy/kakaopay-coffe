@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.kakaopay.coffee.api.order.OrderVo;
 import org.kakaopay.coffee.api.user.request.UserLoginServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserRechargePointServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
@@ -62,8 +63,8 @@ class UserServiceTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 아이디에 포인트 충전")
-        void withNotExistUsers() throws Exception {
+        @DisplayName("정상 충전")
+        void withSuccessCase() throws Exception {
             // give
             UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
             userRepository.save(user1);
@@ -162,4 +163,10 @@ class UserServiceTest {
                          .build();
     }
 
+    private OrderVo makeOrderVo(Long menuId, int quantity) {
+        return OrderVo.builder()
+                      .menuId(menuId)
+                      .quantity(quantity)
+                      .build();
+    }
 }

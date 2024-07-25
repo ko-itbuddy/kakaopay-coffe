@@ -49,7 +49,6 @@ public class UserService {
         }
 
         userRepository.save(UserEntity.of(request));
-
     }
 
     @Transactional
