@@ -33,15 +33,12 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
     private Long id;
 
     @Column(length = 20, unique = true)
-    @NotNull
     private String phone;
 
     @Column(length = 30)
-    @NotNull
     private String name;
 
     @Column(length = 128)
-    @NotNull
     @Convert(converter = PasswordConverter.class)
     private String password;
 

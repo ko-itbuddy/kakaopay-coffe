@@ -3,14 +3,10 @@ spring:
     default: local
 
   datasource:
-    url: jdbc:h2:mem:~/cafeKioskApplication;MODE=Oracle;
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  jpa:
-    hibernate:
-      ddl-auto: none
+    url: jdbc:mariadb://localhost:3306/coffee
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: coffee
+    password: coffee1234#$#$
 
 ---
 spring:
@@ -21,10 +17,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  datasource:
+    p6spy:
+      enabled: true
+      appender: com.p6spy.engine.spy.appender.Slf4JLogger
+      logMessageFormat:
+        p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
 
   h2:
     console:
@@ -39,11 +37,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
+  datasource:
+    p6spy:
+      enabled: true
+      appender: com.p6spy.engine.spy.appender.Slf4JLogger
+      logMessageFormat:
+        p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
   sql:
     init:
       mode: never
