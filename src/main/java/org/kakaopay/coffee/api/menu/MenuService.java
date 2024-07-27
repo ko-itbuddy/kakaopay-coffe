@@ -7,6 +7,8 @@ import org.kakaopay.coffee.api.menu.request.MenuListServiceRequest;
 import org.kakaopay.coffee.api.menu.request.MenuPopularListServiceRequest;
 import org.kakaopay.coffee.api.menu.response.MenuListResponse;
 import org.kakaopay.coffee.api.menu.response.MenuPopularListResponse;
+import org.kakaopay.coffee.db.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuJpaReader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MenuService {
 
-    private final MenuRepository menuRepository;
-    private final MenuRepositoryImpl menuRepositoryImpl;
+    private final MenuJpaReader menuJpaReader;
 
 
     /*
@@ -23,10 +24,10 @@ public class MenuService {
      * */
     public MenuListResponse getMenuList(MenuListServiceRequest request) {
 
-        List<MenuEntity> result = menuRepositoryImpl.findAll(request.getPage(),
+        List<MenuEntity> result = menuJpaReader.findAllGroupByMenuIdPickLatestMenu(request.getPage(),
             request.getCount(), request.getSort());
 
-        Long totalCount = menuRepositoryImpl.findAllTotalCount();
+        Long totalCount = menuJpaReader.findAllGroupByMenuIdPickLatestMenuTotalCount();
 
         return MenuListResponse.of(result, request.getPage(), totalCount);
     }

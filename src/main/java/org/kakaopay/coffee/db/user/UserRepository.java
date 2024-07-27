@@ -1,8 +1,6 @@
-package org.kakaopay.coffee.api.user;
+package org.kakaopay.coffee.db.user;
 
-import java.util.List;
 import java.util.Optional;
-import org.kakaopay.coffee.api.menu.MenuEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {

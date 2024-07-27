@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.config.redisson;
+package org.kakaopay.coffee.config.distributionlock;
 
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;

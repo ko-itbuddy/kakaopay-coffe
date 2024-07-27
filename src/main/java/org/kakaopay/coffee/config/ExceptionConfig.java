@@ -1,6 +1,5 @@
 package org.kakaopay.coffee.config;
 
-import org.apache.coyote.BadRequestException;
 import org.kakaopay.coffee.api.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -23,8 +22,8 @@ public class ExceptionConfig {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(BadRequestException.class)
-    public ApiResponse<Object> BadRequest(BadRequestException e) {
+    @ExceptionHandler(BadRequest.class)
+    public ApiResponse<Object> BadRequest(BadRequest e) {
         return ApiResponse.of(
             HttpStatus.BAD_REQUEST,
             e.getMessage(),

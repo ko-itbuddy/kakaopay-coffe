@@ -3,6 +3,7 @@ package org.kakaopay.coffee.api.menu;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.kakaopay.coffee.db.menu.MenuEntity;
 
 @Getter
 @NoArgsConstructor

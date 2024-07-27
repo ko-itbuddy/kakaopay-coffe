@@ -2,7 +2,6 @@ package org.kakaopay.coffee.api.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.kakaopay.coffee.api.common.ApiResponse;
 import org.kakaopay.coffee.api.user.request.UserLoginRequest;
 import org.kakaopay.coffee.api.user.request.UserRechargePointRequest;

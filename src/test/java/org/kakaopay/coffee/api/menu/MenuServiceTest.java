@@ -10,8 +10,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.kakaopay.coffee.api.menu.request.MenuListServiceRequest;
 import org.kakaopay.coffee.api.menu.response.MenuListResponse;
+import org.kakaopay.coffee.db.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")

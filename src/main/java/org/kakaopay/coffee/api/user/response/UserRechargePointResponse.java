@@ -2,7 +2,7 @@ package org.kakaopay.coffee.api.user.response;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.kakaopay.coffee.api.user.UserEntity;
+import org.kakaopay.coffee.db.user.UserEntity;
 
 @Getter
 public class UserRechargePointResponse {
@@ -16,7 +16,7 @@ public class UserRechargePointResponse {
 
     public static UserRechargePointResponse of(UserEntity userEntity){
         return UserRechargePointResponse.builder()
-                                        .point(userEntity.getPointSum())
+                                        .point(userEntity.getPoint())
                                         .build();
     }
 }

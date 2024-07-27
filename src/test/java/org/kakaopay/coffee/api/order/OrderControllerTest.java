@@ -8,15 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.kakaopay.coffee.api.menu.MenuEntity;
-import org.kakaopay.coffee.api.menu.MenuRepository;
 import org.kakaopay.coffee.api.order.request.OrderRequest;
-import org.kakaopay.coffee.api.user.UserEntity;
-import org.kakaopay.coffee.api.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

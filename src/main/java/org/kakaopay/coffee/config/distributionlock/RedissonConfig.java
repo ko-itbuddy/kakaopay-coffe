@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.config.redisson;
+package org.kakaopay.coffee.config.distributionlock;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

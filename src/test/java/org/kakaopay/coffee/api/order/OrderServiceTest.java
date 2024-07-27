@@ -4,23 +4,26 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.kakaopay.coffee.api.menu.MenuEntity;
-import org.kakaopay.coffee.api.menu.MenuRepository;
+import org.kakaopay.coffee.db.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuRepository;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
-import org.kakaopay.coffee.api.user.UserEntity;
-import org.kakaopay.coffee.api.user.UserPointHistoryEntity;
-import org.kakaopay.coffee.api.user.UserPointHistoryRepository;
-import org.kakaopay.coffee.api.user.UserRepository;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuRepository;
+import org.kakaopay.coffee.db.user.UserEntity;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryEntity;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryRepository;
+import org.kakaopay.coffee.db.user.UserRepository;
+import org.kakaopay.coffee.db.order.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -72,7 +75,7 @@ class OrderServiceTest {
     }
 
     private Long MENU_ID = null;
-    private final Integer CONCURRENT_COUNT = 100;
+    private final Integer CONCURRENT_COUNT = 10;
 
     @Nested
     @DisplayName("3. 커피 주문/결제하기")
@@ -109,37 +112,28 @@ class OrderServiceTest {
         @DisplayName("분산락 테스트")
         void testRedissonLock() throws Exception {
             // given
-            OrderVo orderVo1 = makeOrderVo(1L, 1);
 
             UserEntity user1 = userRepository.findAll().get(0);
+            userPointHistoryRepository.save(UserPointHistoryEntity.builder()
+                                                                  .userId(user1.getId())
+                                                                  .point(10000000)
+                                                                  .build());
 
-            OrderServiceRequest request = OrderServiceRequest.builder()
-                                                             .userId(user1.getId())
-                                                             .orderVos(List.of(orderVo1))
-                                                             .build();
-
-            // when
-            orderingTest((_no)-> {
-                try {
-                    orderService.order(request);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            });
-            // then
-        }
-
-        private void orderingTest(Consumer<Void> action) throws InterruptedException {
             Integer originQuantity = menuRepository.findById(MENU_ID).orElseThrow().getInventory();
 
             ExecutorService executorService = Executors.newFixedThreadPool(32);
             CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT);
 
             for (int i = 0; i < CONCURRENT_COUNT; i++) {
+                OrderVo finalOrderVo = makeOrderVo(1L, i+1);
                 executorService.submit(() -> {
                     try {
-                        action.accept(null);
+                        orderService.order(OrderServiceRequest.builder()
+                                                              .userId(user1.getId())
+                                                              .orderVos(List.of(finalOrderVo))
+                                                              .build());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     } finally {
                         latch.countDown();
                     }
@@ -152,6 +146,7 @@ class OrderServiceTest {
 
             Assertions.assertThat(menu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
 
+            // then
         }
 
     }

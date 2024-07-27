@@ -14,8 +14,12 @@ import org.kakaopay.coffee.api.user.request.UserRechargePointServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
 import org.kakaopay.coffee.api.user.response.UserLoginResponse;
 import org.kakaopay.coffee.api.user.response.UserRechargePointResponse;
+import org.kakaopay.coffee.db.user.UserEntity;
+import org.kakaopay.coffee.db.user.UserRepository;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 

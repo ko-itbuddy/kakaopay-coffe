@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.api.user;
+package org.kakaopay.coffee.db.userpointhistory;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

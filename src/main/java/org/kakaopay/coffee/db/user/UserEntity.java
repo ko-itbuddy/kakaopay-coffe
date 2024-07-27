@@ -1,17 +1,17 @@
-package org.kakaopay.coffee.api.user;
+package org.kakaopay.coffee.db.user;
 
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import lombok.AccessLevel;
@@ -19,8 +19,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.kakaopay.coffee.api.common.BaseEntity;
+import org.kakaopay.coffee.api.user.PasswordConverter;
 import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
+import org.kakaopay.coffee.db.common.BaseEntity;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -42,6 +44,8 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
     @Convert(converter = PasswordConverter.class)
     private String password;
 
+    @Column
+    private Integer point = 0;
 
     @ToString.Exclude
     @OneToMany
@@ -49,17 +53,17 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
         name = "userId",
         referencedColumnName = "id",
         insertable = false,
-        updatable = false
+        updatable = false,
+        foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
     )
     private SortedSet<UserPointHistoryEntity> userPointHistories = new TreeSet<>();
 
     @Builder
-    private UserEntity(String phone, String name, String password,
-        SortedSet<UserPointHistoryEntity> userPointHistories) {
+    private UserEntity(Long id, String phone, String name, String password) {
+        this.id = id;
         this.phone = phone;
         this.name = name;
         this.password = password;
-        this.userPointHistories = userPointHistories;
     }
 
     public static UserEntity of(UserSignUpServiceRequest request) {
@@ -68,13 +72,6 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
                          .name(request.getName())
                          .password(request.getPassword())
                          .build();
-    }
-
-    public Integer getPointSum() {
-        return this.getUserPointHistories()
-                   .stream()
-                   .map(UserPointHistoryEntity::getPoint)
-                   .reduce(0, Integer::sum);
     }
 
     @Override

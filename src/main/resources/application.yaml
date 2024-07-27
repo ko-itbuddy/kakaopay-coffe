@@ -19,8 +19,6 @@ spring:
       ddl-auto: create
   datasource:
     p6spy:
-      enabled: true
-      appender: com.p6spy.engine.spy.appender.Slf4JLogger
       logMessageFormat:
         p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
 
@@ -39,8 +37,6 @@ spring:
       ddl-auto: create
   datasource:
     p6spy:
-      enabled: true
-      appender: com.p6spy.engine.spy.appender.Slf4JLogger
       logMessageFormat:
         p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
   sql:

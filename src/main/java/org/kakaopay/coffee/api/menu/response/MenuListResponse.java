@@ -6,9 +6,8 @@ import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.kakaopay.coffee.api.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuEntity;
 import org.kakaopay.coffee.api.menu.MenuVo;
-import org.springframework.data.domain.Page;
 
 @Getter
 @NoArgsConstructor

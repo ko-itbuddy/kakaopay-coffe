@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.api.order;
+package org.kakaopay.coffee.db.ordermenu;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
