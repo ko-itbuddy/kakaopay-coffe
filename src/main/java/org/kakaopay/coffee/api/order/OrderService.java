@@ -7,16 +7,24 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.kakaopay.coffee.api.menu.MenuEntity;
-import org.kakaopay.coffee.api.menu.MenuRepository;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
-import org.kakaopay.coffee.api.user.UserEntity;
-import org.kakaopay.coffee.api.user.UserPointHistoryEntity;
-import org.kakaopay.coffee.api.user.UserPointHistoryRepository;
-import org.kakaopay.coffee.api.user.UserRepository;
-import org.kakaopay.coffee.config.redisson.RedissonLock;
+import org.kakaopay.coffee.config.distributionlock.DistributedLock;
+import org.kakaopay.coffee.db.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuJpaManager;
+import org.kakaopay.coffee.db.menu.MenuJpaReader;
+import org.kakaopay.coffee.db.order.OrderEntity;
+import org.kakaopay.coffee.db.order.OrderJpaManager;
+import org.kakaopay.coffee.db.order.OrderJpaReader;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuJpaManager;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuJpaReader;
+import org.kakaopay.coffee.db.user.UserEntity;
+import org.kakaopay.coffee.db.user.UserJpaManager;
+import org.kakaopay.coffee.db.user.UserJpaReader;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryEntity;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaManager;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaReader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,34 +32,41 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final OrderRepository orderRepository;
-    private final OrderMenuRepository orderMenuRepository;
-    private final MenuRepository menuRepository;
-    private final UserPointHistoryRepository userPointHistoryRepository;
-    private final UserRepository userRepository;
+    private final UserJpaReader userJpaReader;
+    private final UserJpaManager userJpaManager;
+
+    private final UserPointHistoryJpaReader userPointHistoryJpaReader;
+    private final UserPointHistoryJpaManager userPointHistoryJpaManager;
+
+    private final MenuJpaReader menuJpaReader;
+    private final MenuJpaManager menuJpaManager;
+
+    private final OrderJpaReader orderJpaReader;
+    private final OrderJpaManager orderJpaManager;
+
+    private final OrderMenuJpaReader orderMenuJpaReader;
+    private final OrderMenuJpaManager orderMenuJpaManager;
 
 
     /*
      * 3. 커피 주문/결제 하기 API
      * */
     @Transactional
-    @RedissonLock("#order")
+    @DistributedLock("#request")
     public OrderResponse order(OrderServiceRequest request) throws Exception {
-        Optional<UserEntity> user = userRepository.findById(request.getUserId());
+        Optional<UserEntity> user = userJpaReader.findById(request.getUserId());
 
         // 존재하는 사용자인지 확인
         checkExistUser(user);
 
         // 재고 확인
         List<Long> menuIds = request.getOrders().stream().map(OrderVo::getMenuId).toList();
-        Map<Long, MenuEntity> menuMap = getLongMenuEntityMap(menuIds);
-
+        Map<Long, MenuEntity> menuMap = menuJpaReader.getLongMenuEntityMapByMenuIds(menuIds.stream().sorted().toList());
         checkMenuInventory(request, menuMap);
 
         // 사용자 포인트가 주문 보다 적은지 확인
-        int userTotalPoint = user.get().getPointSum();
+        int userTotalPoint = user.get().getPoint();
         int orderTotalPoint = getOrderTotalPoint(request, menuMap);
-
         checkUserPointIsUnderOrderTotalPoint(userTotalPoint, orderTotalPoint);
 
         // 주문 접수
@@ -73,19 +88,27 @@ public class OrderService {
         return orderTotalPoint;
     }
 
-    public Map<Long, MenuEntity> getLongMenuEntityMap(List<Long> menuIds) {
-        List<MenuEntity> menus = menuRepository.findAllGroupByMenuIdPickLatestMenu(menuIds);
-        return menus.stream()
-                    .collect(Collectors.toMap(MenuEntity::getMenuId,
-                        Function.identity()));
+    public void checkMenuInventory(OrderServiceRequest request,
+        Map<Long, MenuEntity> menuMap) {
+        MenuEntity tmpMenu;
+        int inventoryMinusOrderQuantity = 0;
+        for (OrderVo orderVo : request.getOrders()) {
+            tmpMenu = menuMap.get(orderVo.getMenuId());
+            inventoryMinusOrderQuantity = tmpMenu.getInventory() - orderVo.getQuantity();
+            if (inventoryMinusOrderQuantity < 0) {
+                throw new IllegalArgumentException(
+                    String.format("%s:%s 의 재고가 %s만큼 모자랍니다.", orderVo.getMenuId(), tmpMenu.getName(),
+                        -inventoryMinusOrderQuantity));
+            }
+        }
     }
 
     public OrderEntity saveOrder(OrderServiceRequest request, Optional<UserEntity> user,
-        Map<Long, MenuEntity> menuMap, int orderTotalPoint) {
+        Map<Long, MenuEntity> menuMap, int orderTotalPoint) throws Exception {
         OrderEntity orderEntity = OrderEntity.builder()
                                              .userId(user.get().getId())
                                              .build();
-        orderRepository.save(orderEntity);
+        orderJpaManager.save(orderEntity);
 
         List<OrderMenuEntity> orderMenuEntities = new ArrayList<>();
         List<MenuEntity> menuEntities = new ArrayList<>();
@@ -104,12 +127,13 @@ public class OrderService {
             tmpMenu.decrease(order.getQuantity());
             menuEntities.add(tmpMenu);
         }
-        orderMenuRepository.saveAll(orderMenuEntities);
-        menuRepository.saveAll(menuEntities);
-        userPointHistoryRepository.save(UserPointHistoryEntity.builder()
+        orderMenuJpaManager.saveAll(orderMenuEntities);
+        menuJpaManager.saveAll(menuEntities);
+        userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
                                                               .userId(user.get().getId())
                                                               .point(orderTotalPoint)
                                                               .build());
+
 
         return orderEntity;
     }
@@ -123,20 +147,7 @@ public class OrderService {
         }
     }
 
-    public void checkMenuInventory(OrderServiceRequest request,
-        Map<Long, MenuEntity> menuMap) {
-        MenuEntity tmpMenu;
-        int inventoryMinusOrderQuantity = 0;
-        for (OrderVo orderVo : request.getOrders()) {
-            tmpMenu = menuMap.get(orderVo.getMenuId());
-            inventoryMinusOrderQuantity = tmpMenu.getInventory() - orderVo.getQuantity();
-            if (inventoryMinusOrderQuantity < 0) {
-                throw new IllegalArgumentException(
-                    String.format("%s:%s 의 재고가 %s만큼 모자랍니다.", orderVo.getMenuId(), tmpMenu.getName(),
-                        -inventoryMinusOrderQuantity));
-            }
-        }
-    }
+
 
     public void checkExistUser(Optional<UserEntity> user) {
         if (user.isEmpty()) {

@@ -19,7 +19,6 @@ import org.kakaopay.coffee.db.user.UserRepository;
 import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 
@@ -164,6 +163,7 @@ class UserServiceTest {
                          .phone(phone)
                          .name(name)
                          .password(password)
+                         .point(0)
                          .build();
     }
 

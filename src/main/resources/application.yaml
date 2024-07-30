@@ -42,3 +42,5 @@ spring:
   sql:
     init:
       mode: never
+logging:
+  org.redisson: info

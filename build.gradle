@@ -67,17 +67,6 @@ tasks.withType(JavaCompile) {
     options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
 }
 
-//
-//tasks.withType(JavaCompile).configureEach {
-//    options.compilerArgs << '-parameters'
-//}
-compileJava{
-    options.compilerArgs << '-parameters'
-}
-
-compileTestJava {
-    options.compilerArgs << '-parameters'
-}
 
 clean.doLast {
     file(querydslDir).deleteDir()

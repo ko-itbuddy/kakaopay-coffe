@@ -23,6 +23,7 @@ import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@ToString
 @Table(name = "TB_MENU")
 public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
 

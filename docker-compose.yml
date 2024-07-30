@@ -9,3 +9,7 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: example
 
+  redis:
+    image: redis
+    restart: always
+

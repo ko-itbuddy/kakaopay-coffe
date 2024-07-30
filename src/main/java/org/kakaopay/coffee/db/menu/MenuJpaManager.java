@@ -1,17 +1,53 @@
 package org.kakaopay.coffee.db.menu;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.kakaopay.coffee.db.common.BaseJpaManager;
 import org.springframework.stereotype.Component;
 
 
 @Component
-public class MenuJpaManager extends BaseJpaManager<MenuEntity, Long, MenuRepository> {
+@RequiredArgsConstructor
+public class MenuJpaManager implements BaseJpaManager<MenuEntity, Long> {
 
-    public MenuJpaManager(MenuRepository menuRepository,
-        JPAQueryFactory jpaQueryFactory) {
-        super(menuRepository, jpaQueryFactory);
+    private final MenuRepository menuRepository;
+    private final JPAQueryFactory jpaQueryFactory;
+
+
+    @Override
+    public MenuEntity save(MenuEntity entity) throws Exception {
+        return menuRepository.save(entity);
     }
 
+    @Override
+    public <S extends MenuEntity> Iterable<S> saveAll(Iterable<S> entities) throws Exception {
+        return menuRepository.saveAll(entities);
+    }
 
+    @Override
+    public <S extends MenuEntity> S saveAndFlush(S entity) throws Exception {
+        return menuRepository.saveAndFlush(entity);
+    }
+
+    @Override
+    public <S extends MenuEntity> Iterable<S> saveAllAndFlush(Iterable<S> entities)
+        throws Exception {
+        return menuRepository.saveAllAndFlush(entities);
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(Iterable<Long> ids) throws Exception {
+        menuRepository.deleteAllByIdInBatch(ids);
+    }
+
+    @Override
+    public void deleteAllInBatch() throws Exception {
+        menuRepository.deleteAllInBatch();
+    }
+
+    @Override
+    public void bulkMerge(List<MenuEntity> userEntities) throws Exception {
+
+    }
 }

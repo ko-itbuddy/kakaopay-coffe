@@ -37,7 +37,7 @@ public class UserService {
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
         userPointHistoryJpaManager.saveAndFlush(UserPointHistoryEntity.of(request));
-        long updatedRow = userJpaManager.increasePoint(user.get().getId(),
+        long updatedRow = userJpaManager.updateUserPointByUserId(user.get().getId(),
             user.get().getPoint() + request.getPoint());
 
         if (updatedRow < 1) {

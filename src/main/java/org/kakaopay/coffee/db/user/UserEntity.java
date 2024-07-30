@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.kakaopay.coffee.api.user.PasswordConverter;
 import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
 import org.kakaopay.coffee.db.common.BaseEntity;
@@ -27,6 +29,7 @@ import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@ToString
 @Table(name = "TB_USER")
 public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
 
@@ -45,7 +48,8 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
     private String password;
 
     @Column
-    private Integer point = 0;
+    @ColumnDefault("0")
+    private Integer point = 0 ;
 
     @ToString.Exclude
     @OneToMany
@@ -59,11 +63,12 @@ public class UserEntity extends BaseEntity implements Comparable<UserEntity> {
     private SortedSet<UserPointHistoryEntity> userPointHistories = new TreeSet<>();
 
     @Builder
-    private UserEntity(Long id, String phone, String name, String password) {
+    private UserEntity(Long id, String phone, String name, String password, Integer point) {
         this.id = id;
         this.phone = phone;
         this.name = name;
         this.password = password;
+        this.point = point == null ? 0 : point;
     }
 
     public static UserEntity of(UserSignUpServiceRequest request) {

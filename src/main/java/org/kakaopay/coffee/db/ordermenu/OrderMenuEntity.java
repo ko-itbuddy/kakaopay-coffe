@@ -10,12 +10,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.kakaopay.coffee.db.common.BaseEntity;
 import org.kakaopay.coffee.api.order.OrderVo;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@ToString
 @Table(name = "TB_ORDER_MENU")
 public class OrderMenuEntity extends BaseEntity {
 

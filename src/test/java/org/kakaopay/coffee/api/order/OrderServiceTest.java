@@ -10,20 +10,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.kakaopay.coffee.db.menu.MenuEntity;
-import org.kakaopay.coffee.db.menu.MenuRepository;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
+import org.kakaopay.coffee.db.menu.MenuEntity;
+import org.kakaopay.coffee.db.menu.MenuRepository;
+import org.kakaopay.coffee.db.order.OrderRepository;
 import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
 import org.kakaopay.coffee.db.ordermenu.OrderMenuRepository;
 import org.kakaopay.coffee.db.user.UserEntity;
+import org.kakaopay.coffee.db.user.UserJpaManager;
+import org.kakaopay.coffee.db.user.UserJpaReader;
 import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryEntity;
-import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryRepository;
-import org.kakaopay.coffee.db.user.UserRepository;
-import org.kakaopay.coffee.db.order.OrderRepository;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
@@ -39,19 +39,24 @@ class OrderServiceTest {
     OrderMenuRepository orderMenuRepository;
     @Autowired
     MenuRepository menuRepository;
+
     @Autowired
-    UserPointHistoryRepository userPointHistoryRepository;
+    UserPointHistoryJpaManager userPointHistoryJpaManager;
+
     @Autowired
-    UserRepository userRepository;
+    UserJpaReader userJpaReader;
+    @Autowired
+    UserJpaManager userJpaManager;
+
 
     @BeforeEach
-    void initTest() {
+    void initTest() throws Exception {
 
         // given
-        UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
-        userRepository.save(user1);
+        UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456", 9000);
+        userJpaManager.save(user1);
 
-        userPointHistoryRepository.save(UserPointHistoryEntity.builder()
+        userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
                                                               .userId(user1.getId())
                                                               .point(9000)
                                                               .build());
@@ -66,9 +71,9 @@ class OrderServiceTest {
     }
 
     @AfterEach
-    void tearUp() {
-        userPointHistoryRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+    void tearUp() throws Exception {
+        userPointHistoryJpaManager.deleteAllInBatch();
+        userJpaManager.deleteAllInBatch();
         orderMenuRepository.deleteAllInBatch();
         menuRepository.deleteAllInBatch();
         orderRepository.deleteAllInBatch();
@@ -90,7 +95,7 @@ class OrderServiceTest {
             OrderVo orderVo2 = makeOrderVo(2L, 1);
             OrderVo orderVo3 = makeOrderVo(3L, 1);
 
-            UserEntity user1 = userRepository.findAll().get(0);
+            UserEntity user1 = userJpaReader.findAll().get(0);
 
             OrderServiceRequest request = OrderServiceRequest.builder()
                                                              .userId(user1.getId())
@@ -113,11 +118,23 @@ class OrderServiceTest {
         void testRedissonLock() throws Exception {
             // given
 
-            UserEntity user1 = userRepository.findAll().get(0);
-            userPointHistoryRepository.save(UserPointHistoryEntity.builder()
+            Integer addPoint = 10000000;
+
+            UserEntity user1 = userJpaReader.findAll().get(0);
+            userJpaManager.updateUserPointByUserId(user1.getId(), user1.getPoint()+addPoint);
+            userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
                                                                   .userId(user1.getId())
-                                                                  .point(10000000)
+                                                                  .point(addPoint)
                                                                   .build());
+
+            UserEntity user2 = createUserEntity("010-1111-1112", "데드풀", "123456", 9000);
+            userJpaManager.save(user2);
+            userJpaManager.updateUserPointByUserId(user2.getId(), user2.getPoint()+addPoint);
+            userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
+                                                                  .userId(user2.getId())
+                                                                  .point(addPoint)
+                                                                  .build());
+
 
             Integer originQuantity = menuRepository.findById(MENU_ID).orElseThrow().getInventory();
 
@@ -125,11 +142,14 @@ class OrderServiceTest {
             CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT);
 
             for (int i = 0; i < CONCURRENT_COUNT; i++) {
-                OrderVo finalOrderVo = makeOrderVo(1L, i+1);
+                OrderVo finalOrderVo = makeOrderVo(1L, 1);
+
+                int finalI = i;
                 executorService.submit(() -> {
                     try {
                         orderService.order(OrderServiceRequest.builder()
-                                                              .userId(user1.getId())
+                                                              .userId(getUserIdByIndex(List.of(user1, user2),
+                                                                  finalI))
                                                               .orderVos(List.of(finalOrderVo))
                                                               .build());
                     } catch (Exception e) {
@@ -142,22 +162,25 @@ class OrderServiceTest {
 
             latch.await();
 
-            MenuEntity menu = menuRepository.findById(MENU_ID).orElseThrow();
-
-            Assertions.assertThat(menu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
 
             // then
+            MenuEntity menu = menuRepository.findById(MENU_ID).orElseThrow();
+            Assertions.assertThat(menu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
         }
 
     }
 
+    private Long getUserIdByIndex(List<UserEntity> userList, int index){
+        return userList.get(index % userList.size()).getId();
+    }
 
 
-    private UserEntity createUserEntity(String phone, String name, String password) {
+    private UserEntity createUserEntity(String phone, String name, String password, Integer point) {
         return UserEntity.builder()
                          .phone(phone)
                          .name(name)
                          .password(password)
+                         .point(point)
                          .build();
     }
 

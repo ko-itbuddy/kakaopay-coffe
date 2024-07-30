@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DistributedLockAop {
-    private static final String REDISSON_LOCK_PREFIX = "LOCK:";
+    private static final String REDISSON_LOCK_PREFIX = "LOCK";
 
     private final RedissonClient redissonClient;
     private final AopForTransaction aopForTransaction;
@@ -28,23 +28,32 @@ public class DistributedLockAop {
         Method method = signature.getMethod();
         DistributedLock distributedLock = method.getAnnotation(DistributedLock.class);
 
-        String key = REDISSON_LOCK_PREFIX + CustomSpringELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), distributedLock.value());
+        String key = String.format("%s:%s:%s:%s",
+            REDISSON_LOCK_PREFIX,
+            method.getDeclaringClass().getName(),
+            method.getName(),
+            CustomSpringELParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), distributedLock.value())
+        );
+
         RLock rLock = redissonClient.getLock(key);
 
         try {
             boolean available = rLock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());  // (2)
             if (!available) {
+                log.info("key:{}|NOT_AVAILABLE ", key);
                 return false;
             }
-
+            log.info("key:{}|AVAILABLE ", key);
             return aopForTransaction.proceed(joinPoint);
         } catch (InterruptedException e) {
             throw new InterruptedException();
         } finally {
             try {
+                log.info("key:{}|SUCCESS", key);
                 rLock.unlock();
+                log.info("key:{}|UNLOCKED ", key);
             } catch (IllegalMonitorStateException e) {
-                log.info("Redisson Lock Already UnLock serviceName:{} key{}", method.getName(), key);
+                log.info("key:{}|ALREADY_UNLOCKED", key);
             }
         }
     }
