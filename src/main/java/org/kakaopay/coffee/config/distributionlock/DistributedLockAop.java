@@ -40,20 +40,19 @@ public class DistributedLockAop {
         try {
             boolean available = rLock.tryLock(distributedLock.waitTime(), distributedLock.leaseTime(), distributedLock.timeUnit());  // (2)
             if (!available) {
-                log.info("key:{}|NOT_AVAILABLE ", key);
+                log.info("REDISSON_LOCK|{}|NOT_AVAILABLE", key);
                 return false;
             }
-            log.info("key:{}|AVAILABLE ", key);
+            log.info("REDISSON_LOCK|{}|LOCKED", key);
             return aopForTransaction.proceed(joinPoint);
         } catch (InterruptedException e) {
             throw new InterruptedException();
         } finally {
             try {
-                log.info("key:{}|SUCCESS", key);
                 rLock.unlock();
-                log.info("key:{}|UNLOCKED ", key);
+                log.info("REDISSON_LOCK|{}|UNLOCKED", key);
             } catch (IllegalMonitorStateException e) {
-                log.info("key:{}|ALREADY_UNLOCKED", key);
+                log.info("REDISSON_LOCK|{}|ALREADY_UNLOCKED", key);
             }
         }
     }

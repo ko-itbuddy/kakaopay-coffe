@@ -69,7 +69,13 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
         return 1;
     }
 
-    public void decrease(Integer val){
+    public void decreaseInventory(Integer val){
+        if(this.inventory < val){
+            throw new IllegalArgumentException("재고가 충분히자 않습니다. 상품재고 : {}, val : {}");
+        }
         this.inventory = this.inventory - val;
+    }
+    public void increaseInventory(Integer val){
+        this.inventory = this.inventory + val;
     }
 }

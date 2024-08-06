@@ -1,5 +1,6 @@
 package org.kakaopay.coffee.api.order;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -13,10 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
 import org.kakaopay.coffee.db.menu.MenuEntity;
-import org.kakaopay.coffee.db.menu.MenuRepository;
-import org.kakaopay.coffee.db.order.OrderRepository;
+import org.kakaopay.coffee.db.menu.MenuJpaManager;
+import org.kakaopay.coffee.db.menu.MenuJpaReader;
+import org.kakaopay.coffee.db.order.OrderJpaManager;
+import org.kakaopay.coffee.db.order.OrderJpaReader;
 import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
-import org.kakaopay.coffee.db.ordermenu.OrderMenuRepository;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuJpaManager;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuJpaReader;
 import org.kakaopay.coffee.db.user.UserEntity;
 import org.kakaopay.coffee.db.user.UserJpaManager;
 import org.kakaopay.coffee.db.user.UserJpaReader;
@@ -34,11 +38,19 @@ class OrderServiceTest {
     OrderService orderService;
 
     @Autowired
-    OrderRepository orderRepository;
+    OrderJpaReader orderJpaReader;
     @Autowired
-    OrderMenuRepository orderMenuRepository;
+    OrderJpaManager orderJpaManager;
+
     @Autowired
-    MenuRepository menuRepository;
+    OrderMenuJpaReader orderMenuJpaReader;
+    @Autowired
+    OrderMenuJpaManager orderMenuJpaManager;
+
+    @Autowired
+    MenuJpaReader menuJpaReader;
+    @Autowired
+    MenuJpaManager menuJpaManager;
 
     @Autowired
     UserPointHistoryJpaManager userPointHistoryJpaManager;
@@ -65,7 +77,7 @@ class OrderServiceTest {
         MenuEntity menu2 = createMenuEntity(2L, "아이스티", 100, 3000);
         MenuEntity menu3 = createMenuEntity(3L, "카페라떼", 100, 4500);
 
-        menuRepository.saveAll(List.of(menu1, menu2, menu3));
+        menuJpaManager.saveAll(List.of(menu1, menu2, menu3));
         MENU_ID = menu1.getMenuKey();
 
     }
@@ -74,13 +86,13 @@ class OrderServiceTest {
     void tearUp() throws Exception {
         userPointHistoryJpaManager.deleteAllInBatch();
         userJpaManager.deleteAllInBatch();
-        orderMenuRepository.deleteAllInBatch();
-        menuRepository.deleteAllInBatch();
-        orderRepository.deleteAllInBatch();
+        orderMenuJpaManager.deleteAllInBatch();
+        menuJpaManager.deleteAllInBatch();
+        orderJpaManager.deleteAllInBatch();
     }
 
     private Long MENU_ID = null;
-    private final Integer CONCURRENT_COUNT = 10;
+    private final Integer CONCURRENT_COUNT = 100;
 
     @Nested
     @DisplayName("3. 커피 주문/결제하기")
@@ -107,51 +119,52 @@ class OrderServiceTest {
             // when
             OrderResponse orderResponse = orderService.order(request);
 
-            List<OrderMenuEntity> savedOrderMenus = orderMenuRepository.findAllByOrderId(
-                orderResponse.getOrderId());
+
             // then
-//            Assertions.assertThat();
+            List<MenuEntity> updatedMenu = menuJpaReader.findAllByMenuIdsGroupByMenuIdPickLatestMenu(
+                List.of(orderVo1.getMenuId(), orderVo2.getMenuId(), orderVo3.getMenuId()));
+
+            Assertions.assertThat(updatedMenu)
+                      .extracting("menuId", "inventory")
+                      .containsExactlyInAnyOrder(
+                          Assertions.tuple(1L,99),
+                          Assertions.tuple(2L,99),
+                          Assertions.tuple(3L,99)
+                      );
+
+            List<OrderMenuEntity> savedOrderMenus = orderMenuJpaReader.findAllByOrderId(
+                orderResponse.getOrderId());
+
+            Assertions.assertThat(savedOrderMenus)
+                      .extracting("orderId","menuKey", "quantity")
+                      .containsExactlyInAnyOrder(
+                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(0).getMenuKey(), 1),
+                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(1).getMenuKey(), 1),
+                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(2).getMenuKey(), 1)
+                      );
         }
 
         @Test
         @DisplayName("분산락 테스트")
         void testRedissonLock() throws Exception {
             // given
+            List<UserEntity> users = createUserWithCount(CONCURRENT_COUNT);
 
-            Integer addPoint = 10000000;
+            userJpaManager.saveAllAndFlush(users);
 
-            UserEntity user1 = userJpaReader.findAll().get(0);
-            userJpaManager.updateUserPointByUserId(user1.getId(), user1.getPoint()+addPoint);
-            userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
-                                                                  .userId(user1.getId())
-                                                                  .point(addPoint)
-                                                                  .build());
-
-            UserEntity user2 = createUserEntity("010-1111-1112", "데드풀", "123456", 9000);
-            userJpaManager.save(user2);
-            userJpaManager.updateUserPointByUserId(user2.getId(), user2.getPoint()+addPoint);
-            userPointHistoryJpaManager.save(UserPointHistoryEntity.builder()
-                                                                  .userId(user2.getId())
-                                                                  .point(addPoint)
-                                                                  .build());
-
-
-            Integer originQuantity = menuRepository.findById(MENU_ID).orElseThrow().getInventory();
+            Integer originQuantity = menuJpaReader.findById(MENU_ID).orElseThrow().getInventory();
 
             ExecutorService executorService = Executors.newFixedThreadPool(32);
             CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT);
 
             for (int i = 0; i < CONCURRENT_COUNT; i++) {
-                OrderVo finalOrderVo = makeOrderVo(1L, 1);
-
                 int finalI = i;
                 executorService.submit(() -> {
                     try {
-                        orderService.order(OrderServiceRequest.builder()
-                                                              .userId(getUserIdByIndex(List.of(user1, user2),
-                                                                  finalI))
-                                                              .orderVos(List.of(finalOrderVo))
-                                                              .build());
+                        orderService.order(
+                            getOrderByIdx(users, List.of(makeOrderVo(1L, 1)),
+                                finalI)
+                        );
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {
@@ -164,10 +177,37 @@ class OrderServiceTest {
 
 
             // then
-            MenuEntity menu = menuRepository.findById(MENU_ID).orElseThrow();
+            MenuEntity menu = menuJpaReader.findById(MENU_ID).orElseThrow();
             Assertions.assertThat(menu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
         }
 
+    }
+
+    private List<UserEntity> createUserWithCount(int count) {
+        if (9999 < count || 0 > count) {
+            throw new RuntimeException("count는 0~9999");
+        }
+        List<UserEntity> result = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            int number = 9999 - i;
+            result.add(
+                UserEntity.builder()
+                          .phone(String.format("010-%4d-%4d", number, number))
+                          .name("user_" + i)
+                          .password(String.format("%6d", number))
+                          .point(10000)
+                          .build()
+            );
+        }
+        return result;
+    }
+
+    private OrderServiceRequest getOrderByIdx(List<UserEntity> userList, List<OrderVo> orderVoList,
+        int idx) {
+        return OrderServiceRequest.builder()
+                                  .userId(getUserIdByIndex(userList, idx))
+                                  .orderVos(orderVoList)
+                                  .build();
     }
 
     private Long getUserIdByIndex(List<UserEntity> userList, int index){

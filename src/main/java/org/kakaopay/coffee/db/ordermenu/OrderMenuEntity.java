@@ -42,8 +42,9 @@ public class OrderMenuEntity extends BaseEntity {
 
 
     @Builder
-    private OrderMenuEntity(Long userId, Long menuKey, int orderSequence, int quantity) {
+    private OrderMenuEntity(Long userId, Long orderId, Long menuKey, int orderSequence, int quantity) {
         this.userId = userId;
+        this.orderId = orderId;
         this.menuKey = menuKey;
         this.orderSequence = orderSequence;
         this.quantity = quantity;

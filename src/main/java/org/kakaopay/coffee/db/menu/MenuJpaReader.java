@@ -13,6 +13,7 @@ import org.kakaopay.coffee.api.menu.MenuListSort;
 import org.kakaopay.coffee.config.distributionlock.DistributedLock;
 import org.kakaopay.coffee.db.common.BaseJpaReader;
 import org.kakaopay.coffee.db.order.OrderEntity;
+import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,26 +42,6 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
                 )
             )
             .fetch();
-    }
-
-
-    public Map<Long, MenuEntity> getLongMenuEntityMapByMenuIds(List<Long> menuIds) {
-        QMenuEntity menuSub = new QMenuEntity("menuSub");
-        List<MenuEntity> menus = jpaQueryFactory
-            .select(menu)
-            .from(menu)
-            .where(menu.menuKey.in(
-                    JPAExpressions.select(menuSub.menuKey.max())
-                                  .from(menuSub)
-                                  .where(menuSub.menuId.in(menuIds))
-                                  .groupBy(menuSub.menuId)
-                                  .orderBy(menuSub.menuId.asc())
-                )
-            )
-            .fetch();
-        return menus.stream()
-                    .collect(Collectors.toMap(MenuEntity::getMenuId,
-                        Function.identity()));
     }
 
     public List<MenuEntity> findAllGroupByMenuIdPickLatestMenu(Long page, Long count, MenuListSort menuListSort) {

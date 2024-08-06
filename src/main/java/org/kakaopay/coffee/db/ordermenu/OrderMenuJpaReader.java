@@ -12,9 +12,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OrderMenuJpaReader implements BaseJpaReader<OrderMenuEntity, Long> {
 
-
+    private static final QOrderMenuEntity orderMenu = new QOrderMenuEntity("qom");
     private final JPAQueryFactory jpaQueryFactory;
     private final OrderMenuRepository orderMenuRepository;
+
+    public List<OrderMenuEntity> findAllByOrderId(Long orderId){
+        return jpaQueryFactory
+            .select(orderMenu)
+            .from(orderMenu)
+            .where(orderMenu.orderId.eq(orderId))
+            .fetch();
+    }
 
     @Override
     public List<OrderMenuEntity> findAll() throws Exception {

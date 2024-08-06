@@ -36,6 +36,8 @@ spring:
     hibernate:
       ddl-auto: create
   datasource:
+    hikari:
+      maximum-pool-size: 100
     p6spy:
       logMessageFormat:
         p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
