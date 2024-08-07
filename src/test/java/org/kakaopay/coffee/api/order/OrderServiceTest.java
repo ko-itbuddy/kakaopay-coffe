@@ -1,5 +1,8 @@
 package org.kakaopay.coffee.api.order;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +36,12 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @SpringBootTest
 class OrderServiceTest {
+
+    private Long MENU_ID = null;
+    private final Integer CONCURRENT_COUNT = 10;
+    private final int INIT_USER_POINT = 10000;
+
+
 
     @Autowired
     OrderService orderService;
@@ -91,9 +100,6 @@ class OrderServiceTest {
         orderJpaManager.deleteAllInBatch();
     }
 
-    private Long MENU_ID = null;
-    private final Integer CONCURRENT_COUNT = 100;
-
     @Nested
     @DisplayName("3. 커피 주문/결제하기")
     class Order {
@@ -124,23 +130,23 @@ class OrderServiceTest {
             List<MenuEntity> updatedMenu = menuJpaReader.findAllByMenuIdsGroupByMenuIdPickLatestMenu(
                 List.of(orderVo1.getMenuId(), orderVo2.getMenuId(), orderVo3.getMenuId()));
 
-            Assertions.assertThat(updatedMenu)
+            assertThat(updatedMenu)
                       .extracting("menuId", "inventory")
                       .containsExactlyInAnyOrder(
-                          Assertions.tuple(1L,99),
-                          Assertions.tuple(2L,99),
-                          Assertions.tuple(3L,99)
+                          tuple(1L, 99),
+                          tuple(2L, 99),
+                          tuple(3L, 99)
                       );
 
             List<OrderMenuEntity> savedOrderMenus = orderMenuJpaReader.findAllByOrderId(
                 orderResponse.getOrderId());
 
-            Assertions.assertThat(savedOrderMenus)
+            assertThat(savedOrderMenus)
                       .extracting("orderId","menuKey", "quantity")
                       .containsExactlyInAnyOrder(
-                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(0).getMenuKey(), 1),
-                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(1).getMenuKey(), 1),
-                          Assertions.tuple(orderResponse.getOrderId(), updatedMenu.get(2).getMenuKey(), 1)
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(0).getMenuKey(), 1),
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(1).getMenuKey(), 1),
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(2).getMenuKey(), 1)
                       );
         }
 
@@ -177,8 +183,14 @@ class OrderServiceTest {
 
 
             // then
-            MenuEntity menu = menuJpaReader.findById(MENU_ID).orElseThrow();
-            Assertions.assertThat(menu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
+            MenuEntity resultMenu = menuJpaReader.findById(MENU_ID).orElseThrow();
+            assertThat(resultMenu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
+            List<UserEntity> resultUser = userJpaReader.findAllById(
+                users.stream().map(UserEntity::getId).toList());
+            assertThat(resultUser).extracting("point")
+                                  .containsExactlyInAnyOrder(8500,8500,8500,8500,8500,
+                                      8500,8500,8500,8500,8500);
+
         }
 
     }
@@ -195,7 +207,7 @@ class OrderServiceTest {
                           .phone(String.format("010-%4d-%4d", number, number))
                           .name("user_" + i)
                           .password(String.format("%6d", number))
-                          .point(10000)
+                          .point(INIT_USER_POINT)
                           .build()
             );
         }

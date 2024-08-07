@@ -27,6 +27,14 @@ public class UserJpaManager implements BaseJpaManager<UserEntity, Long> {
                                    .where(user.id.eq(userId)).execute();
     }
 
+    @Transactional
+    @DistributedLock("#userId")
+    public long addPointBYUserId(Long userId, Integer point) {
+        return jpaQueryFactory.update(user)
+                              .set(user.point, user.point.add(point))
+                              .where(user.id.eq(userId)).execute();
+    }
+
     @Override
     public UserEntity save(UserEntity entity) throws Exception {
         return userRepository.save(entity);

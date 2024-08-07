@@ -62,8 +62,6 @@ public class OrderService {
         // 주문 접수
         OrderEntity orderEntity = saveOrder(request.getUserId(), request.getOrders(), menuIds);
 
-        // kafka 인기 메뉴
-
         return OrderResponse.builder().orderId(orderEntity.getId()).build();
     }
 
@@ -142,6 +140,7 @@ public class OrderService {
                                                               .userId(userId)
                                                               .point(orderTotalPoint)
                                                               .build());
+        userJpaManager.addPointBYUserId(userId, -orderTotalPoint);
         return orderEntity;
     }
 
