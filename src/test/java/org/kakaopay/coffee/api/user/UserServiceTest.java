@@ -169,7 +169,7 @@ class UserServiceTest {
 
     private OrderVo makeOrderVo(Long menuId, int quantity) {
         return OrderVo.builder()
-                      .menuId(menuId)
+                      .menuCode(menuId)
                       .quantity(quantity)
                       .build();
     }

@@ -54,7 +54,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.redisson:redisson-spring-boot-starter:3.33.0'
 
-//    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
+    implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
 }
 
 Provider<RegularFile> querydslDir = layout.buildDirectory.file("generated/querydsl")

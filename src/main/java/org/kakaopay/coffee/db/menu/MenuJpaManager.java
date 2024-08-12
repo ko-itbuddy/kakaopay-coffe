@@ -19,17 +19,20 @@ public class MenuJpaManager implements BaseJpaManager<MenuEntity, Long> {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Transactional
-    @DistributedLock("#id")
-    public MenuEntity decreaseInventoryById(Long id, int inventory) {
-        MenuEntity targetMenu = jpaQueryFactory.select(menu)
+    @DistributedLock("#menuCode")
+    public Long addInventoryByMenuCode(Long menuCode, int inventory) {
+        MenuEntity menuEntity = jpaQueryFactory.select(menu)
                                                .from(menu)
-                                               .where(menu.menuKey.eq(id))
+                                               .where(menu.menuCode.eq(menuCode))
+                                                .orderBy(menu.id.desc())
                                                .fetchFirst();
-        if (targetMenu == null) {
-            throw new IllegalArgumentException("존재하지 않는 메뉴 id");
-        }
-        targetMenu.decreaseInventory(inventory);
-        return menuRepository.save(targetMenu);
+        if(menuEntity == null) throw new IllegalArgumentException("존재하지 않는 메뉴입니다.");
+        if (inventory < 0 && menuEntity.getInventory() < inventory)
+            throw new IllegalArgumentException("재고가 부족합니다.");
+
+        return jpaQueryFactory.update(menu)
+                              .set(menu.inventory, menu.inventory.add(inventory))
+                              .where(menu.menuCode.eq(menuCode)).execute();
     }
 
     @Override

@@ -60,7 +60,7 @@ class MenuServiceTest {
             assertThat(response.getMenus()).hasSize(3);
             assertThat(response.getCurrentPage()).isEqualTo(1);
             assertThat(response.getTotalCount()).isEqualTo(3);
-            assertThat(response.getMenus()).extracting("id", "name", "inventory", "price")
+            assertThat(response.getMenus()).extracting("code", "name", "inventory", "price")
                                            .containsExactly(
                                                tuple(1L, "1-아메리카노", 100, 2500),
                                                tuple(2L, "2-아이스티", 100, 3000),
@@ -88,7 +88,7 @@ class MenuServiceTest {
     private MenuEntity createMenuEntity(Long menuId, String name, Integer inventory,
         Integer price) {
         return MenuEntity.builder()
-                         .menuId(menuId)
+                         .menuCode(menuId)
                          .name(name)
                          .inventory(inventory)
                          .price(price)

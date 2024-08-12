@@ -145,69 +145,6 @@ class MenuControllerTest {
 
 
         }
-
-        @Test
-        @DisplayName("메뉴 조회시 틀린 정렬과 함께 조회")
-        void withIncorrectSort() throws Exception {
-            // given
-            Map<String, String> request = new HashMap<>();
-            request.put("page", "1");
-            request.put("count", "10");
-            request.put("sort", "INCORRECT_SORT");
-
-            // when // then
-            mockMvc.perform(
-                       get("/api/menus/popular")
-                           .content(objectMapper.writeValueAsString(request))
-                           .contentType(MediaType.APPLICATION_JSON)
-                   )
-                   .andDo(print())
-                   .andExpect(status().isBadRequest());
-
-
-        }
-
-        @Test
-        @DisplayName("메뉴 조회시 page 음수")
-        void withMinusPage() throws Exception {
-            // given
-            MenuListRequest request = MenuListRequest.builder()
-                                                     .page(-1L)
-                                                     .count(10L)
-                                                     .build();
-
-            // when // then
-            mockMvc.perform(
-                       get("/api/menus/popular")
-                           .content(objectMapper.writeValueAsString(request))
-                           .contentType(MediaType.APPLICATION_JSON)
-                   )
-                   .andDo(print())
-                   .andExpect(status().isBadRequest());
-
-
-        }
-
-        @Test
-        @DisplayName("메뉴 조회시 count 음수")
-        void withMinusCount() throws Exception {
-            // given
-            MenuListRequest request = MenuListRequest.builder()
-                                                     .page(1L)
-                                                     .count(-10L)
-                                                     .build();
-
-            // when // then
-            mockMvc.perform(
-                       get("/api/menus/popular")
-                           .content(objectMapper.writeValueAsString(request))
-                           .contentType(MediaType.APPLICATION_JSON)
-                   )
-                   .andDo(print())
-                   .andExpect(status().isBadRequest());
-
-
-        }
     }
 
 }

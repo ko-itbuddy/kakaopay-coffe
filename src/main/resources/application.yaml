@@ -7,6 +7,18 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: coffee
     password: coffee1234#$#$
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+management:
+  endpoint:
+    health:
+      show-details: always
 
 ---
 spring:

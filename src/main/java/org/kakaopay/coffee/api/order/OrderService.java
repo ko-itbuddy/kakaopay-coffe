@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
 import org.kakaopay.coffee.db.menu.MenuEntity;
@@ -48,38 +47,37 @@ public class OrderService {
     private final OrderMenuJpaReader orderMenuJpaReader;
     private final OrderMenuJpaManager orderMenuJpaManager;
 
-
     /*
      * 3. 커피 주문/결제 하기 API
      * */
     public OrderResponse order(OrderServiceRequest request) throws Exception {
 
-        List<Long> menuIds = request.getOrders().stream().map(OrderVo::getMenuId).toList();
+        List<Long> menuCodes = request.getOrders().stream().map(OrderVo::getMenuCode).toList();
 
         // 재고와 확인 주문자의 포인트 확인
-        checkUserPointIsUnderOrderTotalPoint(request.getUserId(), request.getOrders(), menuIds);
+        checkUserPointIsUnderOrderTotalPoint(request.getUserId(), request.getOrders(), menuCodes);
 
         // 주문 접수
-        OrderEntity orderEntity = saveOrder(request.getUserId(), request.getOrders(), menuIds);
+        OrderEntity orderEntity = saveOrder(request.getUserId(), request.getOrders(), menuCodes);
 
         return OrderResponse.builder().orderId(orderEntity.getId()).build();
     }
 
-    private Map<Long, MenuEntity> getLongMenuEntityMapByMenuIds(List<Long> menuIds)
+    private Map<Long, MenuEntity> getLongMenuEntityMapByMenuCodes(List<Long> menuCodes)
         throws Exception {
         Map<Long, MenuEntity> resultMap = new HashMap<>();
-        for (Long menuId : menuIds) {
-            menuJpaReader.findById(menuId)
-                         .ifPresent(menuEntity -> resultMap.put(menuId, menuEntity));
+        for (Long menuCode : menuCodes) {
+            menuJpaReader.findByMenuCode(menuCode)
+                         .ifPresent(menuEntity -> resultMap.put(menuCode, menuEntity));
         }
         return resultMap;
     }
 
     public void checkUserPointIsUnderOrderTotalPoint(Long userId, List<OrderVo> orders,
-        List<Long> menuIds)
+        List<Long> menuCodes)
         throws Exception {
 
-        Map<Long, MenuEntity> menuEntityMap = getLongMenuEntityMapByMenuIds(menuIds);
+        Map<Long, MenuEntity> menuEntityMap = getLongMenuEntityMapByMenuCodes(menuCodes);
         Optional<UserEntity> user = userJpaReader.findById(userId);
 
         if (user.isEmpty()) {
@@ -88,13 +86,13 @@ public class OrderService {
         int orderTotalPoint = 0;
         for (OrderVo order : orders) {
             MenuEntity tmpMenu;
-            tmpMenu = menuEntityMap.get(order.getMenuId());
+            tmpMenu = menuEntityMap.get(order.getMenuCode());
             if (tmpMenu.getInventory() < order.getQuantity()) {
                 throw new IllegalArgumentException(
-                    String.format("menuId:%s 상품의 재고가 충분하지 않습니다.", order.getMenuId()));
+                    String.format("menuId:%s 상품의 재고가 충분하지 않습니다.", order.getMenuCode()));
             }
             orderTotalPoint +=
-                menuEntityMap.get(order.getMenuId()).getPrice() * order.getQuantity();
+                menuEntityMap.get(order.getMenuCode()).getPrice() * order.getQuantity();
         }
 
         int userTotalPointMinusOrderTotalPoint = user.get().getPoint() - orderTotalPoint;
@@ -106,14 +104,14 @@ public class OrderService {
 
     }
     @Transactional
-    public OrderEntity saveOrder(Long userId, List<OrderVo> orders, List<Long> menuIds) throws Exception {
+    public OrderEntity saveOrder(Long userId, List<OrderVo> orders, List<Long> menuCodes) throws Exception {
         OrderEntity orderEntity = OrderEntity.builder()
                                              .userId(userId)
                                              .build();
         orderJpaManager.save(orderEntity);
 
         List<OrderMenuEntity> orderMenuEntities = new ArrayList<>();
-        Map<Long, MenuEntity> menuEntityMap = getLongMenuEntityMapByMenuIds(menuIds);
+        Map<Long, MenuEntity> menuEntityMap = getLongMenuEntityMapByMenuCodes(menuCodes);
         List<MenuEntity> menuEntities = new ArrayList<>();
         OrderVo order;
         int orderTotalPoint = 0;
@@ -121,17 +119,17 @@ public class OrderService {
 
         for (int idx = 0; idx < orders.size(); idx++) {
             order = orders.get(idx);
-            MenuEntity tmpMenu = menuEntityMap.get(order.getMenuId());
+            MenuEntity tmpMenu = menuEntityMap.get(order.getMenuCode());
             orderMenuEntities.add(OrderMenuEntity.builder()
                                                  .userId(userId)
                                                  .orderId(orderEntity.getId())
-                                                 .menuKey(tmpMenu.getMenuKey())
+                                                 .menuId(tmpMenu.getId())
                                                  .orderSequence(idx + 1)
                                                  .quantity(order.getQuantity())
                                                  .build());
 
             menuEntities.add(tmpMenu);
-            menuJpaManager.decreaseInventoryById(tmpMenu.getMenuId(), order.getQuantity());
+            menuJpaManager.addInventoryByMenuCode(tmpMenu.getMenuCode(), -order.getQuantity());
             orderTotalPoint += order.getQuantity() * tmpMenu.getPrice();
         }
         orderMenuJpaManager.saveAll(orderMenuEntities);
@@ -140,7 +138,7 @@ public class OrderService {
                                                               .userId(userId)
                                                               .point(orderTotalPoint)
                                                               .build());
-        userJpaManager.addPointBYUserId(userId, -orderTotalPoint);
+        userJpaManager.addPointByUserId(userId, -orderTotalPoint);
         return orderEntity;
     }
 

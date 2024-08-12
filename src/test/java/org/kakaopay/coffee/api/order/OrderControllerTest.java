@@ -44,19 +44,19 @@ class OrderControllerTest {
             List<OrderVo> orderVoList = new ArrayList<>();
             orderVoList.add(
                 OrderVo.builder()
-                       .menuId(1L)
+                       .menuCode(1L)
                        .quantity(1)
                        .build()
             );
             orderVoList.add(
                 OrderVo.builder()
-                       .menuId(2L)
+                       .menuCode(2L)
                        .quantity(2)
                        .build())
             ;
             orderVoList.add(
                 OrderVo.builder()
-                       .menuId(3L)
+                       .menuCode(3L)
                        .quantity(3)
                        .build()
             );

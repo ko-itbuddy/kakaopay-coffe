@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -87,7 +86,7 @@ class OrderServiceTest {
         MenuEntity menu3 = createMenuEntity(3L, "카페라떼", 100, 4500);
 
         menuJpaManager.saveAll(List.of(menu1, menu2, menu3));
-        MENU_ID = menu1.getMenuKey();
+        MENU_ID = menu1.getId();
 
     }
 
@@ -116,6 +115,7 @@ class OrderServiceTest {
             UserEntity user1 = userJpaReader.findAll().get(0);
 
             OrderServiceRequest request = OrderServiceRequest.builder()
+
                                                              .userId(user1.getId())
                                                              .orderVos(List.of(orderVo1,
                                                                  orderVo2,
@@ -127,11 +127,11 @@ class OrderServiceTest {
 
 
             // then
-            List<MenuEntity> updatedMenu = menuJpaReader.findAllByMenuIdsGroupByMenuIdPickLatestMenu(
-                List.of(orderVo1.getMenuId(), orderVo2.getMenuId(), orderVo3.getMenuId()));
+            List<MenuEntity> updatedMenu = menuJpaReader.findAllByMenuCodesGroupByMenuCodePickLatestMenu(
+                List.of(orderVo1.getMenuCode(), orderVo2.getMenuCode(), orderVo3.getMenuCode()));
 
             assertThat(updatedMenu)
-                      .extracting("menuId", "inventory")
+                      .extracting("menuCode", "inventory")
                       .containsExactlyInAnyOrder(
                           tuple(1L, 99),
                           tuple(2L, 99),
@@ -142,16 +142,16 @@ class OrderServiceTest {
                 orderResponse.getOrderId());
 
             assertThat(savedOrderMenus)
-                      .extracting("orderId","menuKey", "quantity")
+                      .extracting("orderId","menuId", "quantity")
                       .containsExactlyInAnyOrder(
-                          tuple(orderResponse.getOrderId(), updatedMenu.get(0).getMenuKey(), 1),
-                          tuple(orderResponse.getOrderId(), updatedMenu.get(1).getMenuKey(), 1),
-                          tuple(orderResponse.getOrderId(), updatedMenu.get(2).getMenuKey(), 1)
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(0).getId(), 1),
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(1).getId(), 1),
+                          tuple(orderResponse.getOrderId(), updatedMenu.get(2).getId(), 1)
                       );
         }
 
         @Test
-        @DisplayName("분산락 테스트")
+        @DisplayName("분산락 테스트 한가지 메뉴를 여러명의 유저가 주문")
         void testRedissonLock() throws Exception {
             // given
             List<UserEntity> users = createUserWithCount(CONCURRENT_COUNT);
@@ -236,17 +236,17 @@ class OrderServiceTest {
                          .build();
     }
 
-    private OrderVo makeOrderVo(Long menuId, int quantity) {
+    private OrderVo makeOrderVo(Long menuCode, int quantity) {
         return OrderVo.builder()
-                      .menuId(menuId)
+                      .menuCode(menuCode)
                       .quantity(quantity)
                       .build();
     }
 
-    private MenuEntity createMenuEntity(Long menuId, String name, Integer inventory,
+    private MenuEntity createMenuEntity(Long menuCode, String name, Integer inventory,
         Integer price) {
         return MenuEntity.builder()
-                         .menuId(menuId)
+                         .menuCode(menuCode)
                          .name(name)
                          .inventory(inventory)
                          .price(price)

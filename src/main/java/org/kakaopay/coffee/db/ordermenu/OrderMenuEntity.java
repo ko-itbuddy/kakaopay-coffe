@@ -32,7 +32,10 @@ public class OrderMenuEntity extends BaseEntity {
     private Long userId;
 
     @Column
-    private Long menuKey;
+    private Long menuId;
+
+    @Column
+    private Long menuCode;
 
     @Column
     private int orderSequence;
@@ -42,10 +45,11 @@ public class OrderMenuEntity extends BaseEntity {
 
 
     @Builder
-    private OrderMenuEntity(Long userId, Long orderId, Long menuKey, int orderSequence, int quantity) {
+    private OrderMenuEntity(Long userId, Long orderId, Long menuKey, Long menuId, int orderSequence, int quantity) {
         this.userId = userId;
         this.orderId = orderId;
-        this.menuKey = menuKey;
+        this.menuId = menuId;
+        this.menuCode = menuCode;
         this.orderSequence = orderSequence;
         this.quantity = quantity;
     }
@@ -54,7 +58,7 @@ public class OrderMenuEntity extends BaseEntity {
     public static OrderMenuEntity of(OrderVo orderVo, Long userId, int orderSequence) {
         return OrderMenuEntity.builder()
                               .userId(userId)
-                              .menuKey(orderVo.getMenuId())
+                              .menuKey(orderVo.getMenuCode())
                               .orderSequence(orderSequence)
                               .quantity(orderVo.getQuantity())
                               .build();

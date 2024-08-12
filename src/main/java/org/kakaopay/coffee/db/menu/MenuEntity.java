@@ -29,10 +29,10 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long menuKey;
+    private Long id;
 
     @Column
-    private Long menuId;
+    private Long menuCode;
 
     @Column
     private String name;
@@ -44,10 +44,10 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
     private Integer price;
 
     @Builder
-    private MenuEntity(Long menuKey, Long menuId, String name, Integer inventory, Integer price,
+    private MenuEntity(Long id, Long menuCode, String name, Integer inventory, Integer price,
         SortedSet<OrderMenuEntity> orderMenus) {
-        this.menuKey = menuKey;
-        this.menuId = menuId;
+        this.id = id;
+        this.menuCode = menuCode;
         this.name = name;
         this.inventory = inventory;
         this.price = price;
@@ -57,8 +57,8 @@ public class MenuEntity extends BaseEntity implements Comparable<MenuEntity>{
     @ToString.Exclude
     @OneToMany
     @JoinColumn(
-        name = "menuKey",
-        referencedColumnName = "menuKey",
+        name = "menuId",
+        referencedColumnName = "id",
         insertable = false,
         updatable = false,
         foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

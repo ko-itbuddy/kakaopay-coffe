@@ -13,15 +13,15 @@ import lombok.ToString;
 public class OrderVo {
 
     @NotNull
-    private Long menuId;
+    private Long menuCode;
 
     @NotNull
     @Positive
     private int quantity;
 
     @Builder
-    private OrderVo(Long menuId, int quantity) {
-        this.menuId = menuId;
+    private OrderVo(Long menuCode, int quantity) {
+        this.menuCode = menuCode;
         this.quantity = quantity;
     }
 }

@@ -9,14 +9,14 @@ import org.kakaopay.coffee.db.menu.MenuEntity;
 @NoArgsConstructor
 public class MenuVo {
 
-    private Long id;
+    private Long code;
     private String name;
     private int price;
     private int inventory;
 
     @Builder
-    private MenuVo(Long id, String name, int price, int inventory) {
-        this.id = id;
+    private MenuVo(Long code, String name, int price, int inventory) {
+        this.code = code;
         this.name = name;
         this.price = price;
         this.inventory = inventory;
@@ -24,7 +24,7 @@ public class MenuVo {
 
     public static MenuVo of(MenuEntity menuEntity) {
         return MenuVo.builder()
-                     .id(menuEntity.getMenuId())
+                     .code(menuEntity.getMenuCode())
                      .name(menuEntity.getName())
                      .price(menuEntity.getPrice())
                      .inventory(menuEntity.getInventory())

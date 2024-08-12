@@ -1,21 +1,18 @@
 package org.kakaopay.coffee.db.menu;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.kakaopay.coffee.api.menu.MenuListSort;
-import org.kakaopay.coffee.config.distributionlock.DistributedLock;
 import org.kakaopay.coffee.db.common.BaseJpaReader;
-import org.kakaopay.coffee.db.order.OrderEntity;
 import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
+import org.kakaopay.coffee.db.ordermenu.QOrderMenuEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @Component
@@ -23,36 +20,37 @@ import org.springframework.transaction.annotation.Transactional;
 public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
 
     static private final QMenuEntity menu = new QMenuEntity("menu");
+    static private final QOrderMenuEntity orderMenu = new QOrderMenuEntity("orderMenu");
 
     private final MenuRepository menuRepository;
     private final JPAQueryFactory jpaQueryFactory;
 
 
-    public List<MenuEntity> findAllByMenuIdsGroupByMenuIdPickLatestMenu(List<Long> menuIds) {
+    public List<MenuEntity> findAllByMenuCodesGroupByMenuCodePickLatestMenu(List<Long> menuCodes) {
         QMenuEntity menuSub = new QMenuEntity("menuSub");
         return jpaQueryFactory
             .select(menu)
             .from(menu)
-            .where(menu.menuKey.in(
-                    JPAExpressions.select(menuSub.menuKey.max())
+            .where(menu.id.in(
+                    JPAExpressions.select(menuSub.id.max())
                                   .from(menuSub)
-                                  .where(menuSub.menuId.in(menuIds))
-                                  .groupBy(menuSub.menuId)
-                                  .orderBy(menuSub.menuId.asc())
+                                  .where(menuSub.menuCode.in(menuCodes))
+                                  .groupBy(menuSub.menuCode)
+                                  .orderBy(menuSub.menuCode.asc())
                 )
             )
             .fetch();
     }
 
-    public List<MenuEntity> findAllGroupByMenuIdPickLatestMenu(Long page, Long count, MenuListSort menuListSort) {
+    public List<MenuEntity> findAllGroupByMenuCodePickLatestMenu(Long page, Long count, MenuListSort menuListSort) {
         QMenuEntity menuSub = new QMenuEntity("menuSub");
         return jpaQueryFactory.select(menu)
                            .from(menu)
-                           .where(menu.menuKey.in(JPAExpressions.select(menuSub.menuKey.max())
+                           .where(menu.id.in(JPAExpressions.select(menuSub.id.max())
                                                                 .from(menuSub)
                                                                 .limit(count)
                                                                 .offset(page - 1)
-                                                                .groupBy(menuSub.menuId)
+                                                                .groupBy(menuSub.menuCode)
                                                                 .orderBy(toQueryOrder(menuSub,
                                                                     menuListSort))))
                            .fetch();
@@ -66,14 +64,43 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
         };
     }
 
-    public Long findAllGroupByMenuIdPickLatestMenuTotalCount() {
+    public Long findAllGroupByMenuCodePickLatestMenuTotalCount() {
 
         return jpaQueryFactory
-            .select(menu.menuId.countDistinct())
+            .select(menu.menuCode.countDistinct())
             .from(menu)
             .fetchFirst();
     }
 
+    public List<MenuEntity> findPopularMenu(LocalDate today) {
+        return jpaQueryFactory
+            .select(menu)
+            .from(menu)
+            .where(
+                menu.menuCode.in(
+                    JPAExpressions.select(orderMenu.menuCode)
+                                  .from(orderMenu)
+                                  .where(new BooleanBuilder()
+                                      .and(orderMenu.createdAt.goe(
+                                          today.minusDays(8).atStartOfDay()))
+                                      .and(orderMenu.createdAt.lt(today.atStartOfDay())))
+                                  .groupBy(orderMenu.menuCode)
+                                  .orderBy(orderMenu.menuCode.count().desc())
+                                  .limit(3)
+                )
+            )
+            .fetch();
+    }
+
+    public Optional<MenuEntity> findByMenuCode(Long menuCode) throws Exception {
+        return Optional.ofNullable(jpaQueryFactory
+            .select(menu)
+            .from(menu)
+            .where(
+                menu.menuCode.eq(menuCode)
+            )
+            .fetchFirst());
+    }
     @Override
     public List<MenuEntity> findAll() throws Exception {
         return menuRepository.findAll();

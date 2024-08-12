@@ -18,18 +18,17 @@ public class UserJpaManager implements BaseJpaManager<UserEntity, Long> {
     private final JPAQueryFactory jpaQueryFactory;
     private final UserRepository userRepository;
 
-
     @Transactional
     @DistributedLock("#userId")
-    public long updateUserPointByUserId(Long userId, Integer point) {
-        return jpaQueryFactory.update(user)
-                                   .set(user.point, point)
-                                   .where(user.id.eq(userId)).execute();
-    }
+    public long addPointByUserId(Long userId, Integer point) {
+        UserEntity userEntity = jpaQueryFactory.select(user)
+                                               .from(user)
+                                               .where(user.id.eq(userId))
+                                               .fetchFirst();
+        if(userEntity == null) throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        if (point < 0 && userEntity.getPoint() < point)
+            throw new IllegalArgumentException("포인트가 부족합니다.");
 
-    @Transactional
-    @DistributedLock("#userId")
-    public long addPointBYUserId(Long userId, Integer point) {
         return jpaQueryFactory.update(user)
                               .set(user.point, user.point.add(point))
                               .where(user.id.eq(userId)).execute();
