@@ -41,8 +41,8 @@ public class MenuService {
 
     @Cacheable(POPULAR_MENU)
     @Transactional(readOnly = true)
-    public MenuPopularListResponse getMenuPopularList() {
-        return MenuPopularListResponse.of(menuJpaReader.findPopularMenu(LocalDate.now()));
+    public MenuPopularListResponse getMenuPopularList(LocalDate now) {
+        return MenuPopularListResponse.of(menuJpaReader.findPopularMenu(now));
     }
 
     @Scheduled(cron = "0 0 0 * * *")

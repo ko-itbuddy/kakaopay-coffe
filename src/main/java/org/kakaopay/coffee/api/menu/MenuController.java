@@ -1,6 +1,7 @@
 package org.kakaopay.coffee.api.menu;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.kakaopay.coffee.api.common.ApiResponse;
 import org.kakaopay.coffee.api.menu.request.MenuListRequest;
@@ -34,7 +35,7 @@ public class MenuController {
     @GetMapping("api/menus/popular")
     public ApiResponse<MenuPopularListResponse> getMenuPopularList() {
 
-        MenuPopularListResponse result = menuService.getMenuPopularList();
+        MenuPopularListResponse result = menuService.getMenuPopularList(LocalDate.now());
 
         return ApiResponse.of(HttpStatus.OK, result);
     }

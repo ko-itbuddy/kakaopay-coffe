@@ -88,7 +88,7 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
                                   .orderBy(orderMenu.menuCode.count().desc())
                                   .limit(3)
                 )
-            )
+            ).groupBy(menu.menuCode)
             .fetch();
     }
 

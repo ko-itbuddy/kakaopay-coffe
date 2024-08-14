@@ -15,8 +15,8 @@ import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
 import org.kakaopay.coffee.api.user.response.UserLoginResponse;
 import org.kakaopay.coffee.api.user.response.UserRechargePointResponse;
 import org.kakaopay.coffee.db.user.UserEntity;
-import org.kakaopay.coffee.db.user.UserRepository;
-import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryRepository;
+import org.kakaopay.coffee.db.user.UserJpaManager;
+import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,15 +30,15 @@ class UserServiceTest {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaManager userJpaManager;
 
     @Autowired
-    private UserPointHistoryRepository userPointHistoryRepository;
+    private UserPointHistoryJpaManager userPointHistoryJpaManager;
 
     @AfterEach
-    void tearDown() {
-        userPointHistoryRepository.deleteAllInBatch();
-        userRepository.deleteAllInBatch();
+    void tearDown() throws Exception {
+        userPointHistoryJpaManager.deleteAllInBatch();
+        userJpaManager.deleteAllInBatch();
     }
 
     @Nested
@@ -51,7 +51,7 @@ class UserServiceTest {
             // give
             UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
             UserEntity user2 = createUserEntity("010-1234-1234", "매그니토", "123456");
-            userRepository.saveAll(List.of(user1, user2));
+            userJpaManager.saveAll(List.of(user1, user2));
 
             UserRechargePointServiceRequest request = UserRechargePointServiceRequest.builder()
                                                                                      .point(5000)
@@ -70,7 +70,7 @@ class UserServiceTest {
         void withSuccessCase() throws Exception {
             // give
             UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
-            userRepository.save(user1);
+            userJpaManager.save(user1);
 
             UserLoginResponse loginResponse = userService.login(UserLoginServiceRequest.builder()
                                                                          .phone("010-1111-1111").password("123456")
@@ -99,7 +99,7 @@ class UserServiceTest {
         void withExistUserPhone() throws Exception {
             // given
             UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
-            userRepository.save(user1);
+            userJpaManager.save(user1);
 
             UserSignUpServiceRequest request = UserSignUpServiceRequest.builder()
                                                                        .phone("010-1111-1111")
@@ -124,7 +124,7 @@ class UserServiceTest {
         void withWrongPassword() throws Exception {
             // given
             UserEntity user2 = createUserEntity("010-1234-1234", "매그니토", "123456");
-            userRepository.saveAll(List.of( user2));
+            userJpaManager.saveAll(List.of(user2));
 
             UserLoginServiceRequest request = UserLoginServiceRequest.builder()
                                                                      .phone("010-1234-1234")
@@ -143,7 +143,7 @@ class UserServiceTest {
             // given
             UserEntity user1 = createUserEntity("010-1111-1111", "울버린", "123456");
             UserEntity user2 = createUserEntity("010-1234-1234", "매그니토", "123456");
-            userRepository.saveAll(List.of(user1, user2));
+            userJpaManager.saveAll(List.of(user1, user2));
 
             UserLoginServiceRequest request = UserLoginServiceRequest.builder()
                                                                      .phone("010-9999-9999")

@@ -124,6 +124,7 @@ public class OrderService {
                                                  .userId(userId)
                                                  .orderId(orderEntity.getId())
                                                  .menuId(tmpMenu.getId())
+                                                 .menuCode(order.getMenuCode())
                                                  .orderSequence(idx + 1)
                                                  .quantity(order.getQuantity())
                                                  .build());
