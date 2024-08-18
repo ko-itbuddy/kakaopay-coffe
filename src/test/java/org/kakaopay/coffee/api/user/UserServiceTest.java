@@ -8,22 +8,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.kakaopay.coffee.api.order.OrderVo;
 import org.kakaopay.coffee.api.user.request.UserLoginServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserRechargePointServiceRequest;
 import org.kakaopay.coffee.api.user.request.UserSignUpServiceRequest;
 import org.kakaopay.coffee.api.user.response.UserLoginResponse;
 import org.kakaopay.coffee.api.user.response.UserRechargePointResponse;
+import org.kakaopay.coffee.config.TestContainerConfig;
 import org.kakaopay.coffee.db.user.UserEntity;
 import org.kakaopay.coffee.db.user.UserJpaManager;
 import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 
 @ActiveProfiles("test")
 @SpringBootTest
+@ExtendWith(TestContainerConfig.class)
+@ContextConfiguration(initializers = TestContainerConfig.IntegrationTestInitializer.class)
 class UserServiceTest {
 
     @Autowired

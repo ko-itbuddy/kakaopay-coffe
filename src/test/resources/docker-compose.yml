@@ -1,0 +1,22 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mysql:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: mysql
+      MARIADB_ROOT_PASSWORD: test
+    ports:
+      - 3306 # 테스트 환경에서 호스트 매칭(예: 3306:3306) 을 생략하면 포트 충돌을 피할 수 있습니다.
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379 # 테스트 환경에서 호스트 매칭(예: 6379:6379) 을 생략하면 포트 충돌을 피할 수 있습니다.
+
+
+

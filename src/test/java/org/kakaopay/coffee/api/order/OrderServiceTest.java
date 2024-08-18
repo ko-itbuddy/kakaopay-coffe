@@ -13,8 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.kakaopay.coffee.api.order.request.OrderServiceRequest;
 import org.kakaopay.coffee.api.order.response.OrderResponse;
+import org.kakaopay.coffee.config.TestContainerConfig;
 import org.kakaopay.coffee.db.menu.MenuEntity;
 import org.kakaopay.coffee.db.menu.MenuJpaManager;
 import org.kakaopay.coffee.db.menu.MenuJpaReader;
@@ -31,9 +33,12 @@ import org.kakaopay.coffee.db.userpointhistory.UserPointHistoryJpaManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@ExtendWith(TestContainerConfig.class)
+@ContextConfiguration(initializers = TestContainerConfig.IntegrationTestInitializer.class)
 class OrderServiceTest {
 
     private Long MENU_ID = null;

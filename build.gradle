@@ -37,8 +37,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
-    runtimeOnly 'com.h2database:h2'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
@@ -55,6 +56,16 @@ dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.33.0'
 
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1'
+
+
+// TestContainer 기본 의존성
+    testImplementation "org.testcontainers:testcontainers:1.20.1"
+// MySQL 의존성
+    testImplementation 'org.testcontainers:mysql:1.20.1'
+// Redis 의존성
+    testImplementation "com.redis.testcontainers:testcontainers-redis-junit:1.6.4"
+// Kafka 의존성
+    testImplementation "org.testcontainers:kafka:1.20.1"
 }
 
 Provider<RegularFile> querydslDir = layout.buildDirectory.file("generated/querydsl")
