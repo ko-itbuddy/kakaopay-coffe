@@ -39,10 +39,6 @@ public class UserService {
         userPointHistoryJpaManager.saveAndFlush(UserPointHistoryEntity.of(request));
         long updatedRow = userJpaManager.addPointByUserId(user.get().getId(),request.getPoint());
 
-        if (updatedRow < 1) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
-        }
-
         Optional<UserEntity> resultUser = userJpaReader.findById(request.getUserId());
 
         if (resultUser.isEmpty()) {

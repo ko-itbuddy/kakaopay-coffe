@@ -77,8 +77,8 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
             .select(menu)
             .from(menu)
             .where(
-                menu.menuCode.in(
-                    JPAExpressions.select(orderMenu.menuCode)
+                menu.id.in(
+                    JPAExpressions.select(orderMenu.menuId.max())
                                   .from(orderMenu)
                                   .where(new BooleanBuilder()
                                       .and(orderMenu.createdAt.goe(
@@ -88,8 +88,7 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
                                   .orderBy(orderMenu.menuCode.count().desc())
                                   .limit(3)
                 )
-            ).groupBy(menu.menuCode)
-            .fetch();
+            ).fetch();
     }
 
     public Optional<MenuEntity> findByMenuCode(Long menuCode) throws Exception {

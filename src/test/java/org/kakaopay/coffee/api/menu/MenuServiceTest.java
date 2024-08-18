@@ -134,9 +134,9 @@ class MenuServiceTest {
             CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT * 3);
             ExecutorService executorService = Executors.newFixedThreadPool(32);
 
+            makeCountDownLatch(latch, executorService, users, 1L, COUNT_1ST_QTY);
             makeCountDownLatch(latch, executorService, users, 2L, COUNT_2ST_QTY);
             makeCountDownLatch(latch, executorService, users, 3L, COUNT_3ST_QTY);
-            makeCountDownLatch(latch, executorService, users, 1L, COUNT_1ST_QTY);
 
             latch.await();
 

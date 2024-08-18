@@ -20,6 +20,7 @@ management:
     health:
       show-details: always
 
+
 ---
 spring:
   config:
@@ -46,13 +47,24 @@ spring:
 
 
   jpa:
-    hibernate:
-      ddl-auto: create
   datasource:
-    url: jdbc:mariadb://localhost:3306/coffee-test
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: coffee
-    password: coffee1234#$#$
+    url: jdbc:h2:mem:test_db;MODE=MYSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    database: h2
+    generate-ddl: true
+    hibernate:
+      dialect: org.hibernate.dialect.MySQL5Dialect
+      ddl-auto: create
+    open-in-view: false
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        default_batch_fetch_size: 1000
+        dialect.storage_engine: innodb
+
     hikari:
       maximum-pool-size: 100
     p6spy:
@@ -62,4 +74,6 @@ spring:
     init:
       mode: never
 logging:
-  org.redisson: info
+  level:
+    org.redisson: info
+    com.zaxxer.hikari: debug
