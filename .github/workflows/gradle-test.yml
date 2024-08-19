@@ -1,7 +1,12 @@
 name: Check test
 
 on: 
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'test run'
+        required: false
+        default: 'test'
 
 jobs:
   test:
