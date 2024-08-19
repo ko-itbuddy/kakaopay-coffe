@@ -7,6 +7,7 @@
 - MySQL
 - Redis
 - Test Container
+- Kafka (구현 중)
 
 # ERD
 

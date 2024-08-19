@@ -92,3 +92,8 @@ tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
 }
+
+
+test {
+    testLogging.showStandardStreams = true
+}
