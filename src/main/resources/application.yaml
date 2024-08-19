@@ -1,7 +1,6 @@
 spring:
   profiles:
     default: local
-
   datasource:
     url: jdbc:mysql://localhost:3306/coffee
     driver-class-name:

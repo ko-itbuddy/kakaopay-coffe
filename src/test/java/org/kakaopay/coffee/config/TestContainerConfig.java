@@ -67,8 +67,8 @@ public class TestContainerConfig implements BeforeAllCallback {
 
         // Redis 연결 정보 설정
         private void setRedisProperties(Map<String, String> properties) {
-            properties.put("spring.redis.host", REDIS_CONTAINER.getHost());
-            properties.put("spring.redis.port", REDIS_CONTAINER.getFirstMappedPort().toString());
+            properties.put("spring.data.redis.host", REDIS_CONTAINER.getHost());
+            properties.put("spring.data.redis.port", REDIS_CONTAINER.getFirstMappedPort().toString());
         }
     }
 }
