@@ -1,5 +1,7 @@
 # kakaopay-coffe
 
+# 테스트 수행시 Docker가 실행 가능한 환경이여야 함. (https://docs.docker.com/engine/install/)
+
 # 활용 기술
 - Spring Boot 3.3
 - Java 17

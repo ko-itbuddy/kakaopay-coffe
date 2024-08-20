@@ -7,7 +7,7 @@ spring:
     username: coffee
     password: coffee1234#$#$
     hikari:
-      maximum-pool-size: 100
+      maximum-pool-size: 20
   cache:
     type: redis
 

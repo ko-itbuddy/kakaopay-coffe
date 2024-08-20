@@ -133,7 +133,7 @@ class MenuServiceTest {
 
             userJpaManager.saveAllAndFlush(users);
 
-            CountDownLatch latch = new CountDownLatch(9);
+            CountDownLatch latch = new CountDownLatch(5+3+1);
             ExecutorService executorService = Executors.newFixedThreadPool(32);
 
             makeCountDownLatch(latch, executorService, users, 1L, 3, 5);
