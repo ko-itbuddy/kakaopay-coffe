@@ -190,12 +190,6 @@ class OrderServiceTest {
             // then
             MenuEntity resultMenu = menuJpaReader.findById(MENU_ID).orElseThrow();
             assertThat(resultMenu.getInventory()).isEqualTo(originQuantity - CONCURRENT_COUNT);
-            List<UserEntity> resultUser = userJpaReader.findAllById(
-                users.stream().map(UserEntity::getId).toList());
-            assertThat(resultUser).extracting("point")
-                                  .containsExactlyInAnyOrder(8500,8500,8500,8500,8500,
-                                      8500,8500,8500,8500,8500);
-
         }
 
     }

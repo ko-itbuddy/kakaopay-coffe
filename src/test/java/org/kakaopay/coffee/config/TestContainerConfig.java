@@ -1,6 +1,5 @@
 package org.kakaopay.coffee.config;
 
-import com.redis.testcontainers.RedisContainer;
 import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
