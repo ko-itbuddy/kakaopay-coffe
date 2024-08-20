@@ -6,10 +6,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: coffee
     password: coffee1234#$#$
+    hikari:
+      maximum-pool-size: 100
   cache:
     type: redis
-  hikari:
-    maximum-pool-size: 100
 
   data:
     redis:
@@ -49,8 +49,6 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 100
   jpa:
     generate-ddl: true
     hibernate:

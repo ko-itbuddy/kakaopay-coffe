@@ -97,7 +97,7 @@ public class MenuJpaReader implements BaseJpaReader<MenuEntity, Long> {
             .from(menu)
             .where(
                 menu.menuCode.eq(menuCode)
-            )
+            ).orderBy(menu.id.desc())
             .fetchFirst());
     }
     @Override

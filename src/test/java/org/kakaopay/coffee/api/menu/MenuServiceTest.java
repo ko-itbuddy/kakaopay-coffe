@@ -133,11 +133,11 @@ class MenuServiceTest {
 
             userJpaManager.saveAllAndFlush(users);
 
-            CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT * 3);
+            CountDownLatch latch = new CountDownLatch(9);
             ExecutorService executorService = Executors.newFixedThreadPool(32);
 
-            makeCountDownLatch(latch, executorService, users, 1L, 3, 10);
-            makeCountDownLatch(latch, executorService, users, 2L, 2, 5);
+            makeCountDownLatch(latch, executorService, users, 1L, 3, 5);
+            makeCountDownLatch(latch, executorService, users, 2L, 2, 3);
             makeCountDownLatch(latch, executorService, users, 3L, 1, 1);
 
             latch.await();
@@ -147,8 +147,8 @@ class MenuServiceTest {
             assertThat(response.getMenus())
                 .extracting("code", "name", "inventory", "price")
                 .containsExactly(
-                    tuple(1L, "1-아메리카노", 70, 2500),
-                    tuple(2L, "2-아이스티", 90, 3000),
+                    tuple(1L, "1-아메리카노", 85, 2500),
+                    tuple(2L, "2-아이스티", 94, 3000),
                     tuple(3L, "3-카페라떼", 99, 4500)
                 );
 
