@@ -4,19 +4,19 @@ version: '3.1'
 services:
 
   mysql:
-    image: mariadb
+    image: mysql:latest
     restart: always
     environment:
-      MYSQL_DATABASE: mysql
-      MARIADB_ROOT_PASSWORD: test
+      MYSQL_DATABASE: coffee-test
+      MYSQL_ROOT_PASSWORD: 1234
     ports:
-      - 3306 # 테스트 환경에서 호스트 매칭(예: 3306:3306) 을 생략하면 포트 충돌을 피할 수 있습니다.
+      - 33066:3306 # 테스트 환경에서 호스트 매칭(예: 3306:3306) 을 생략하면 포트 충돌을 피할 수 있습니다. - 쿼리 테스트를 위해 외부 포트 연결
 
   redis:
-    image: redis
+    image: redis:6
     restart: always
     ports:
-      - 6379 # 테스트 환경에서 호스트 매칭(예: 6379:6379) 을 생략하면 포트 충돌을 피할 수 있습니다.
+      - 63799:6379 # 테스트 환경에서 호스트 매칭(예: 6379:6379) 을 생략하면 포트 충돌을 피할 수 있습니다. - 쿼리 테스트를 위해 외부 포트 연결
 
 
 

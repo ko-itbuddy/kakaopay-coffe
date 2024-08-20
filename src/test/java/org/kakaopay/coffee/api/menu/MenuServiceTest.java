@@ -43,9 +43,6 @@ class MenuServiceTest {
 
     private final int INIT_USER_POINT = 10000;
     final Integer CONCURRENT_COUNT = 10;
-    final Integer COUNT_1ST_QTY = 5;
-    final Integer COUNT_2ST_QTY = 3;
-    final Integer COUNT_3ST_QTY = 1;
 
     @Autowired
     private MenuService menuService;
@@ -139,26 +136,30 @@ class MenuServiceTest {
             CountDownLatch latch = new CountDownLatch(CONCURRENT_COUNT * 3);
             ExecutorService executorService = Executors.newFixedThreadPool(32);
 
-            makeCountDownLatch(latch, executorService, users, 1L, COUNT_1ST_QTY);
-            makeCountDownLatch(latch, executorService, users, 2L, COUNT_2ST_QTY);
-            makeCountDownLatch(latch, executorService, users, 3L, COUNT_3ST_QTY);
+            makeCountDownLatch(latch, executorService, users, 1L, 3, 10);
+            makeCountDownLatch(latch, executorService, users, 2L, 2, 5);
+            makeCountDownLatch(latch, executorService, users, 3L, 1, 1);
 
             latch.await();
 
             MenuPopularListResponse response = menuService.getMenuPopularList(LocalDate.now().plusDays(1));
             // then
             assertThat(response.getMenus())
-                .extracting("code")
-                .containsExactly(1L, 2L, 3L);
+                .extracting("code", "name", "inventory", "price")
+                .containsExactly(
+                    tuple(1L, "1-아메리카노", 70, 2500),
+                    tuple(2L, "2-아이스티", 90, 3000),
+                    tuple(3L, "3-카페라떼", 99, 4500)
+                );
 
         }
 
     }
 
-    private void makeCountDownLatch(CountDownLatch latch, ExecutorService executorService, List<UserEntity> users, Long menuCode, Integer qty) {
+    private void makeCountDownLatch(CountDownLatch latch, ExecutorService executorService, List<UserEntity> users, Long menuCode, Integer qty, int repeat) {
 
 
-        for (int i = 0; i < CONCURRENT_COUNT; i++) {
+        for (int i = 0; i < repeat; i++) {
             int finalI = i;
             executorService.submit(() -> {
                 try {

@@ -3,7 +3,7 @@ spring:
     default: local
   datasource:
     url: jdbc:mysql://localhost:3306/coffee
-    driver-class-name:
+    driver-class-name: com.mysql.cj.jdbc.Driver
     username: coffee
     password: coffee1234#$#$
   cache:
@@ -58,17 +58,16 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        show_sql: true
-        format_sql: true
         default_batch_fetch_size: 1000
         dialect.storage_engine: innodb
   p6spy:
     logMessageFormat:
       p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
+
   sql:
     init:
       mode: never
 logging:
   level:
     org.redisson: info
-    com.zaxxer.hikari: debug
+#    com.zaxxer.hikari: debug
