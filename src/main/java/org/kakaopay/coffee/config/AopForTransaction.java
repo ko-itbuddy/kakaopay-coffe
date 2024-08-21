@@ -1,4 +1,4 @@
-package org.kakaopay.coffee.api.common;
+package org.kakaopay.coffee.config;
 
 
 import org.aspectj.lang.ProceedingJoinPoint;
