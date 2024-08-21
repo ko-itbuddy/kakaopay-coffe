@@ -25,7 +25,7 @@ import org.kakaopay.coffee.db.ordermenu.OrderMenuEntity;
 @Entity
 @ToString
 @Table(name = "TB_ORDER")
-public class OrderEntity extends BaseEntity implements Comparable<OrderMenuEntity> {
+public class OrderEntity extends BaseEntity implements Comparable<OrderEntity> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -51,7 +51,7 @@ public class OrderEntity extends BaseEntity implements Comparable<OrderMenuEntit
     private SortedSet<OrderMenuEntity> orderMenus = new TreeSet<>();
 
     @Override
-    public int compareTo(OrderMenuEntity o) {
+    public int compareTo(OrderEntity o) {
         return 1;
     }
 }
