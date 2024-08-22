@@ -13,7 +13,7 @@ SI에서 하던대로 작업한것이 많았다.
 6. JpaManager와 JpaReader 또한 Entity와 너무나 강하게 결합되어 있다.
 
 ### 그래서 해당 문제점을 고치며 객체지향적이며 클린 아키텍처를 적용한 프로젝트를 다시 시작하였다.
-https://github.com/ko-itbuddy/coffee-shop
+https://github.dev/ko-itbuddy/coffee-shop
 
 ---
 
